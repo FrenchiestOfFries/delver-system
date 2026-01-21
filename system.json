@@ -1,8 +1,8 @@
 {
   "id": "delver",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "title": "Delver",
-  "url": "",
+  "url": "https://github.com/FrenchiestOfFries/delver-system",
   "description": "WIP System.",
   "license": "LICENSE.txt",
   "authors": [
@@ -38,8 +38,8 @@
   },
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
-  "manifest": "",
-  "download": "",
+  "manifest": "https://raw.githubusercontent.com/FrenchiestOfFries/delver-system/refs/heads/main/system.json",
+  "download": "https://github.com/FrenchiestOfFries/delver-system/releases/download/v0.0.2/delver.zip",
   "grid": {
     "distance": 5,
     "units": "ft"
