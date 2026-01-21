@@ -1,0 +1,38 @@
+{
+  "Actor": {
+    "types": ["character", "npc", "enemy"],
+    "htmlFields": ["notes"],
+    "character": {
+      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
+      "luck": { "current": 0, "max": 0 },
+      "speed": { "baseOverride": null },
+      "inventory": { "slots": [] },
+      "notes": "",
+      "carriedLoosely": ""
+    },
+    "npc": {
+      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
+      "luck": { "current": 0, "max": 0 },
+      "speed": { "baseOverride": null },
+      "notes": ""
+    },
+    "enemy": {
+      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
+      "luck": { "current": 0, "max": 0 },
+      "speed": { "baseOverride": null },
+      "notes": ""
+    }
+  },
+
+  "Item": {
+    "types": ["item"],
+    "htmlFields": ["description"],
+    "item": {
+      "description": "",
+      "quantity": 1,
+      "weight": 0,
+      "attributes": {},
+      "groups": {}
+    }
+  }
+}

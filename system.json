@@ -1,0 +1,47 @@
+{
+  "id": "delver",
+  "version": "0.0.1",
+  "title": "Delver",
+  "url": "",
+  "description": "WIP System.",
+  "license": "LICENSE.txt",
+  "authors": [
+    {
+      "name": "Fry",
+      "url": "https://foundryvtt.com",
+      "flags": {}
+    }
+  ],
+  "esmodules": [
+    "module/simple.js"
+  ],
+  "styles": [
+    "styles/simple.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json",
+      "flags": {}
+    },
+    {
+      "lang": "pl",
+      "name": "Polski",
+      "path": "lang/pl.json",
+      "flags": {}
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "power",
+  "manifest": "",
+  "download": "",
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  }
+}

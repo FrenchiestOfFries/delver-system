@@ -1,0 +1,470 @@
+/* Base layout */
+.delver-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.delver-header {
+  display: grid;
+  gap: 10px 12px;
+  align-items: end;
+}
+
+.delver-header label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.delver-header .big {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Header 12-col grid */
+.header-12 {
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 12px;
+}
+
+.header-row1 {
+  grid-row: 1;
+}
+
+.header-row2 {
+  grid-row: 2;
+}
+
+/* Column placement (matches your 12-col drawing) */
+.name-inline {
+  grid-column: 1 / span 6;
+}
+
+.luck-display {
+  grid-column: 7 / span 1;
+  justify-self: start;
+}
+
+.luck-controls {
+  grid-column: 8 / span 1;
+  justify-self: start;
+}
+
+.defense-inline {
+  grid-column: 9 / span 2;
+  justify-self: start;
+}
+
+.speed-inline {
+  grid-column: 11 / span 2;
+  justify-self: start;
+}
+
+/* Subline placement */
+.header-subline-left {
+  grid-column: 9 / span 2; /* col 9-10 */
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 700;
+  align-self: start;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.header-subline-right {
+  grid-column: 11 / span 2; /* col 11-12 */
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 700;
+  align-self: start;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Name: invisible input */
+.name-inline input[type="text"] {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+  height: 40px;
+  font-size: 34px;
+  font-weight: 900;
+  width: 52%;
+  min-width: 240px;
+  max-width: 520px;
+}
+
+.name-inline input[type="text"]::placeholder {
+  opacity: 0.45;
+}
+
+/* Luck display */
+.luck-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.luck-ratio {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.luck-plain {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  width: 1.8ch;
+  text-align: left;
+}
+
+.luck-slash {
+  font-size: 22px;
+  font-weight: 900;
+  opacity: 0.75;
+  transform: translateY(-2px);
+}
+
+/* Luck controls: Cur + Max inline (side-by-side) */
+.luck-controls-stack {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: start;
+}
+
+.luck-vstack {
+  display: grid;
+  grid-template-rows: auto 24px 24px;
+  row-gap: 4px;
+  justify-items: start;
+}
+
+.luck-mini {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.luck-step {
+  height: 24px;
+  width: 26px;
+  padding: 0;
+  border-radius: 6px;
+  border-width: 2px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Abilities */
+.delver-abilities {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.delver-abilities .ability label {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+/* Stepper baseline */
+.num-stepper {
+  display: grid;
+  grid-template-columns: 26px 1fr 26px;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.num-stepper input[type="number"] {
+  text-align: center;
+  min-width: 0;
+  height: 30px;
+  font-weight: 800;
+}
+
+.num-step {
+  padding: 0;
+  line-height: 1;
+  height: 30px;
+  min-width: 26px;
+  border-radius: 6px;
+  border-width: 2px;
+  font-weight: 900;
+}
+
+/* Inventory header grid */
+.delver-inventory .inv-header {
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.inv-header-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 12px;
+  align-items: end;
+}
+
+.delver-inventory h2 {
+  grid-column: 1 / span 2;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.inv-bar {
+  grid-column: 3 / span 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.inv-spacer {
+  grid-column: 7 / span 6;
+}
+
+/* Equal-size buttons */
+.inv-add,
+.inv-wound-step {
+  height: 30px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  border-width: 2px;
+  font-weight: 800;
+}
+
+.inv-add {
+  width: 110px;
+  padding: 0;
+}
+
+.inv-wound-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.inv-wound-step {
+  width: 30px;
+  padding: 0;
+}
+
+.inv-wound-dc {
+  width: 54px;
+  height: 30px;
+  text-align: center;
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+/* Inventory: two-column, DOWN then RIGHT flow */
+.slot-columns {
+  column-count: 2;
+  column-gap: 10px;
+  margin-top: 8px;
+}
+
+.slot-columns-tight {
+  margin-top: 6px;
+}
+
+/* Inventory slot cards */
+.inv-slot {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  margin: 0 0 3px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Slot layout: chip + label + right-side actions */
+.inv-slot .slot-main {
+  display: grid;
+  grid-template-columns: 78px 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.slot-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Hide dropdown but keep in DOM */
+.inv-slot .slot-kind {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Chip styling */
+.slot-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.9;
+  user-select: none;
+}
+
+.kind-empty .slot-chip {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.kind-fatigue .slot-chip {
+  background: rgba(255, 200, 0, 0.14);
+  border-color: rgba(255, 200, 0, 0.35);
+}
+
+.kind-wound .slot-chip {
+  background: rgba(255, 60, 60, 0.14);
+  border-color: rgba(255, 60, 60, 0.35);
+}
+
+.inv-slot .slot-label {
+  height: 30px;
+}
+
+/* DC chunk (only rendered for wounds in the template) */
+.slot-dc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.slot-remove {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  border-width: 2px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.slot-dc-label {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 800;
+}
+
+.slot-dc-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 30px;
+  width: 4ch;
+  text-align: left;
+  font-weight: 900;
+}
+
+/* Kind visuals */
+.kind-empty {
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+.kind-fatigue {
+  background: rgba(255, 200, 0, 0.10);
+  border-color: rgba(255, 200, 0, 0.35);
+}
+
+.kind-wound {
+  background: rgba(255, 60, 60, 0.10);
+  border-color: rgba(255, 60, 60, 0.35);
+}
+
+/* Notes */
+.delver-notes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.delver-notes textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.delver-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 820px) {
+  .header-12 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .name-inline,
+  .luck-display,
+  .luck-controls,
+  .defense-inline,
+  .speed-inline,
+  .header-subline-left,
+  .header-subline-right {
+    grid-column: auto;
+  }
+
+  .name-inline input[type="text"] {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .delver-abilities {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .slot-columns {
+    column-count: 1;
+  }
+
+  .delver-notes {
+    grid-template-columns: 1fr;
+  }
+
+  .inv-header-12 {
+    grid-template-columns: 1fr;
+  }
+
+  .delver-inventory h2,
+  .inv-bar,
+  .inv-spacer {
+    grid-column: auto;
+  }
+}

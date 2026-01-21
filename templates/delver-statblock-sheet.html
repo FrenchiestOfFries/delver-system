@@ -1,0 +1,47 @@
+<form class="delver-sheet delver-statblock" autocomplete="off">
+  <header class="delver-header">
+    <div class="name">
+      <label>Name</label>
+      <input type="text" name="name" value="{{actor.name}}" />
+    </div>
+
+    <div class="luck">
+      <label>Luck</label>
+      <div class="row">
+        <input type="number" name="system.luck.current" value="{{systemData.luck.current}}" />
+        <span>/</span>
+        <input type="number" name="system.luck.max" value="{{systemData.luck.max}}" />
+      </div>
+    </div>
+
+    <div class="defense">
+      <label>Defense</label>
+      <div class="big">{{derived.defense}}</div>
+      <div class="sub">Fort {{derived.fort}} · Ref {{derived.reflex}} · Will {{derived.will}}</div>
+    </div>
+
+    <div class="speed">
+      <label>Speed (ft)</label>
+      <input type="number" name="system.speed.baseOverride" value="{{systemData.speed.baseOverride}}" placeholder="{{derived.computedSpeed}}" />
+      <div class="sub">Computed: {{derived.computedSpeed}} · Using: {{derived.baseSpeed}}</div>
+    </div>
+  </header>
+
+  <section class="delver-abilities">
+    <div class="ability"><label>STR</label><input type="number" name="system.abilities.str" value="{{systemData.abilities.str}}" min="-10" max="10"/></div>
+    <div class="ability"><label>DEX</label><input type="number" name="system.abilities.dex" value="{{systemData.abilities.dex}}" min="-10" max="10"/></div>
+    <div class="ability"><label>CON</label><input type="number" name="system.abilities.con" value="{{systemData.abilities.con}}" min="-10" max="10"/></div>
+    <div class="ability"><label>INT</label><input type="number" name="system.abilities.int" value="{{systemData.abilities.int}}" min="-10" max="10"/></div>
+    <div class="ability"><label>WIS</label><input type="number" name="system.abilities.wis" value="{{systemData.abilities.wis}}" min="-10" max="10"/></div>
+    <div class="ability"><label>CHA</label><input type="number" name="system.abilities.cha" value="{{systemData.abilities.cha}}" min="-10" max="10"/></div>
+  </section>
+
+  <section class="delver-notes single">
+    <h2>Notes</h2>
+    <textarea name="system.notes">{{systemData.notes}}</textarea>
+  </section>
+
+  <footer class="delver-footer">
+    <button type="submit"><i class="fas fa-save"></i> Save</button>
+  </footer>
+</form>

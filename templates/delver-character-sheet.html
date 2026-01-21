@@ -1,0 +1,248 @@
+<form class="delver-sheet" autocomplete="off">
+  <header class="delver-header header-12">
+    <!-- NAME (col 1-6) -->
+    <div class="name name-inline header-row1">
+      <label>Name</label>
+      <input type="text" name="name" value="{{actor.name}}" placeholder="Name" />
+    </div>
+
+    <!-- LUCK DISPLAY (col 7) -->
+    <div class="luck luck-display header-row1">
+      <div class="luck-title">Luck</div>
+      <div class="luck-ratio">
+        <input
+          class="luck-plain"
+          type="number"
+          name="system.luck.current"
+          value="{{systemData.luck.current}}"
+          min="0"
+          max="{{systemData.luck.max}}"
+        />
+        <span class="luck-slash">/</span>
+        <input
+          class="luck-plain"
+          type="number"
+          name="system.luck.max"
+          value="{{systemData.luck.max}}"
+          min="0"
+        />
+      </div>
+    </div>
+
+    <!-- LUCK CONTROLS (col 8) -->
+    <div class="luck luck-controls header-row1">
+      <!-- Cur + Max controls should be INLINE (horizontal), not stacked -->
+      <div class="luck-controls-stack">
+        <div class="luck-vstack">
+          <div class="luck-mini">Cur</div>
+          <button
+            type="button"
+            class="luck-step"
+            data-luck-field="current"
+            data-step="1"
+            aria-label="Luck cur plus"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            class="luck-step"
+            data-luck-field="current"
+            data-step="-1"
+            aria-label="Luck cur minus"
+          >
+            -
+          </button>
+        </div>
+
+        <div class="luck-vstack">
+          <div class="luck-mini">Max</div>
+          <button
+            type="button"
+            class="luck-step"
+            data-luck-field="max"
+            data-step="1"
+            aria-label="Luck max plus"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            class="luck-step"
+            data-luck-field="max"
+            data-step="-1"
+            aria-label="Luck max minus"
+          >
+            -
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEFENSE (col 9-10) -->
+    <div class="defense defense-inline header-row1">
+      <label>Defense</label>
+      <div class="big">{{derived.defense}}</div>
+    </div>
+
+    <!-- SPEED (col 11-12) -->
+    <div class="speed speed-inline header-row1">
+      <label>Speed (ft)</label>
+      <div class="big">{{derived.baseSpeed}}</div>
+    </div>
+
+    <!-- SUBLINE: Fort/Ref/Will at col 9-10 -->
+    <div class="header-subline-left header-row2">
+      Fort {{derived.fort}} · Ref {{derived.reflex}} · Will {{derived.will}}
+    </div>
+
+    <!-- SUBLINE: Computed at col 11-12 -->
+    <div class="header-subline-right header-row2">
+      Computed {{derived.computedSpeed}}
+    </div>
+  </header>
+
+  <section class="delver-abilities">
+    <div class="ability">
+      <label>STR</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="STR minus">-</button>
+        <input type="number" name="system.abilities.str" value="{{systemData.abilities.str}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="STR plus">+</button>
+      </div>
+    </div>
+
+    <div class="ability">
+      <label>DEX</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="DEX minus">-</button>
+        <input type="number" name="system.abilities.dex" value="{{systemData.abilities.dex}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="DEX plus">+</button>
+      </div>
+    </div>
+
+    <div class="ability">
+      <label>CON</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="CON minus">-</button>
+        <input type="number" name="system.abilities.con" value="{{systemData.abilities.con}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="CON plus">+</button>
+      </div>
+    </div>
+
+    <div class="ability">
+      <label>INT</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="INT minus">-</button>
+        <input type="number" name="system.abilities.int" value="{{systemData.abilities.int}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="INT plus">+</button>
+      </div>
+    </div>
+
+    <div class="ability">
+      <label>WIS</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="WIS minus">-</button>
+        <input type="number" name="system.abilities.wis" value="{{systemData.abilities.wis}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="WIS plus">+</button>
+      </div>
+    </div>
+
+    <div class="ability">
+      <label>CHA</label>
+      <div class="num-stepper">
+        <button type="button" class="num-step" data-step="-1" aria-label="CHA minus">-</button>
+        <input type="number" name="system.abilities.cha" value="{{systemData.abilities.cha}}" min="-10" max="10" />
+        <button type="button" class="num-step" data-step="1" aria-label="CHA plus">+</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="delver-inventory">
+    <div class="inv-header inv-header-12">
+      <h2>Inventory Slots ({{derived.totalSlots}})</h2>
+
+      <div class="inv-bar">
+        <button type="button" class="inv-add inv-add-item" data-add-kind="item">+ Item</button>
+        <button type="button" class="inv-add inv-add-fatigue" data-add-kind="fatigue">+ Fatigue</button>
+        <button type="button" class="inv-add inv-add-wound" data-add-kind="wound">+ Wound</button>
+
+        <div class="inv-wound-control">
+          <button type="button" class="inv-wound-step" data-wound-step="-1" aria-label="Wound DC minus">-</button>
+          <input class="inv-wound-dc" type="number" value="20" min="0" step="1" />
+          <button type="button" class="inv-wound-step" data-wound-step="1" aria-label="Wound DC plus">+</button>
+        </div>
+      </div>
+
+      <div class="inv-spacer"></div>
+    </div>
+
+    <div class="slot-columns slot-columns-tight">
+      {{#each inventorySlots as |slot idx|}}
+        <div class="inv-slot kind-{{slot.kind}}" data-index="{{idx}}">
+          <div class="slot-main">
+            <!-- Hidden dropdown (kept for data pipeline) -->
+            <select class="slot-kind" aria-hidden="true" tabindex="-1">
+              <option value="empty" {{#if (eq slot.kind "empty")}}selected{{/if}}>Empty</option>
+              <option value="item" {{#if (eq slot.kind "item")}}selected{{/if}}>Item</option>
+              <option value="fatigue" {{#if (eq slot.kind "fatigue")}}selected{{/if}}>Fatigue</option>
+              <option value="wound" {{#if (eq slot.kind "wound")}}selected{{/if}}>Wound</option>
+            </select>
+
+            <!-- Visible type chip -->
+            <span class="slot-chip">
+              {{#if (eq slot.kind "wound")}}Wound
+              {{else}}
+                {{#if (eq slot.kind "fatigue")}}Fatigue
+                {{else}}
+                  {{#if (eq slot.kind "item")}}Item
+                  {{else}}Empty{{/if}}
+                {{/if}}
+              {{/if}}
+            </span>
+
+            <input class="slot-label" type="text" value="{{slot.label}}" placeholder="Item / description" />
+
+            <!-- Right-side controls: DC (wound only) + remove (non-empty only) -->
+            <div class="slot-actions">
+              {{#if (eq slot.kind "wound")}}
+                <div class="slot-dc">
+                  <span class="slot-dc-label">DC:</span>
+                  <input class="slot-value slot-dc-input" type="text" value="{{slot.value}}" placeholder="##" />
+                </div>
+              {{/if}}
+
+              {{#unless (eq slot.kind "empty")}}
+                <button
+                  type="button"
+                  class="slot-remove"
+                  data-action="slot-remove"
+                  aria-label="Remove from slot"
+                  title="Clear slot"
+                >
+                  ×
+                </button>
+              {{/unless}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="delver-notes">
+    <div class="notes-col">
+      <h2>Notes</h2>
+      <textarea name="system.notes">{{systemData.notes}}</textarea>
+    </div>
+
+    <div class="notes-col">
+      <h2>Carried Loosely</h2>
+      <textarea name="system.carriedLoosely">{{systemData.carriedLoosely}}</textarea>
+    </div>
+  </section>
+
+  <footer class="delver-footer">
+    <button type="submit"><i class="fas fa-save"></i> Save</button>
+  </footer>
+</form>
