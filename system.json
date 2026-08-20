@@ -1,10 +1,14 @@
 {
   "id": "delver",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "title": "Delver",
+
   "url": "https://github.com/FrenchiestOfFries/delver-system",
+
   "description": "WIP System.",
+
   "license": "LICENSE.txt",
+
   "authors": [
     {
       "name": "Fry",
@@ -12,12 +16,35 @@
       "flags": {}
     }
   ],
+
+  "flags": {
+    "hotReload": {
+      "extensions": [
+        "css",
+        "html",
+        "hbs",
+        "json",
+        "js",
+        "mjs"
+      ],
+
+      "paths": [
+        "styles",
+        "templates",
+        "module",
+        "lang"
+      ]
+    }
+  },
+
   "esmodules": [
     "module/simple.js"
   ],
+
   "styles": [
     "styles/simple.css"
   ],
+
   "languages": [
     {
       "lang": "en",
@@ -25,6 +52,7 @@
       "path": "lang/en.json",
       "flags": {}
     },
+
     {
       "lang": "pl",
       "name": "Polski",
@@ -32,14 +60,16 @@
       "flags": {}
     }
   ],
+
   "compatibility": {
     "minimum": "13",
     "verified": "13"
   },
-  "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power",
+
   "manifest": "https://raw.githubusercontent.com/FrenchiestOfFries/delver-system/refs/heads/main/system.json",
-  "download": "https://github.com/FrenchiestOfFries/delver-system/releases/download/v0.0.2/delver.zip",
+
+  "download": "https://github.com/FrenchiestOfFries/delver-system/releases/download/v0.1.0/delver.zip",
+
   "grid": {
     "distance": 5,
     "units": "ft"

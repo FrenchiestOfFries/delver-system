@@ -1,55 +1,538 @@
-<form class="flexcol {{cssClass}}" autocomplete="off">
-  <header class="sheet-header">
-    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
-    <div class="header-fields">
-      <h1 class="charname">
-        <input name="name" type="text" value="{{item.name}}" placeholder="Name" />
-      </h1>
-      <div class="resource">
-        <label>Quantity</label>
-        <input type="number" name="system.quantity" value="{{systemData.quantity}}" />
-      </div>
-      <div class="resource">
-        <label>Weight</label>
-        <input type="number" name="system.weight" value="{{systemData.weight}}" />
-      </div>
+<form
+  class="delver-item-sheet"
+  autocomplete="off"
+>
+
+  <!-- ====================================================== -->
+  <!-- HEADER                                                 -->
+  <!-- ====================================================== -->
+
+  <header class="delver-item-header">
+
+    <img
+      class="delver-item-image"
+      src="{{item.img}}"
+      data-edit="img"
+      title="{{item.name}}"
+    />
+
+
+    <div class="delver-item-name">
+
+      <label>
+        Name
+      </label>
+
+      <input
+        type="text"
+        name="name"
+        value="{{item.name}}"
+        placeholder="Item Name"
+      />
+
     </div>
+
   </header>
 
-  {{!-- Sheet Tab Navigation --}}
-  <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="description">Description</a>
-    <a class="item" data-tab="attributes">Attributes</a>
-  </nav>
 
-  {{!-- Sheet Body --}}
-  <section class="sheet-body">
+  <!-- ====================================================== -->
+  <!-- BASIC ITEM DATA                                        -->
+  <!-- ====================================================== -->
 
-    {{!-- Description Tab --}}
-    <div class="tab" data-group="primary" data-tab="description">
-      {{editor descriptionHTML target="system.description" button=true editable=editable engine="prosemirror"}}
+  <section class="delver-item-section">
+
+    <h2>
+      Item
+    </h2>
+
+
+    <!-- TYPE -->
+
+    <div class="form-group">
+
+      <label>
+        Type
+      </label>
+
+      <select
+        name="system.category"
+      >
+
+        <option
+          value="misc"
+          {{#if (eq systemData.category "misc")}}
+            selected
+          {{/if}}
+        >
+          Misc
+        </option>
+
+        <option
+          value="weapon"
+          {{#if (eq systemData.category "weapon")}}
+            selected
+          {{/if}}
+        >
+          Weapon
+        </option>
+
+        <option
+          value="armor"
+          {{#if (eq systemData.category "armor")}}
+            selected
+          {{/if}}
+        >
+          Armor
+        </option>
+
+        <option
+          value="spell-vessel"
+          {{#if (eq systemData.category "spell-vessel")}}
+            selected
+          {{/if}}
+        >
+          Spell Vessel
+        </option>
+
+      </select>
+
     </div>
 
-    {{!-- Attributes Tab --}}
-    <div class="tab attributes" data-group="primary" data-tab="attributes">
-      <header class="attributes-header flexrow">
-        <span class="attribute-key">{{localize "SIMPLE.AttributeKey"}}</span>
-        <span class="attribute-value">{{localize "SIMPLE.AttributeValue"}}</span>
-        <span class="attribute-label">{{localize "SIMPLE.AttributeLabel"}}</span>
-        <span class="attribute-dtype">{{localize "SIMPLE.AttributeDtype"}}</span>
-        <a class="attribute-control" data-action="create" data-group="{{group}}"><i class="fas fa-plus"></i></a>
-      </header>
 
-      {{> "systems/delver/templates/parts/sheet-attributes.html" attributes=systemData.ungroupedAttributes dtypes=dtypes}}
+    <!-- CARRY MODE -->
 
-      <div class="groups">
-        {{> "systems/delver/templates/parts/sheet-groups.html" attributes=systemData.groupedAttributes groups=systemData.groups dtypes=dtypes}}
-        <div class="group-controls flexrow">
-          <input class="group-prefix" type="text" value="" />
-          <a class="button group-control" data-action="create-group"><i class="fas fa-plus"></i>Add Attribute Group</a>
-        </div>
+    <div class="form-group">
+
+      <label>
+        Carry
+      </label>
+
+      <select
+        name="system.carryMode"
+      >
+
+        <option
+          value="slot"
+          {{#if (eq systemData.carryMode "slot")}}
+            selected
+          {{/if}}
+        >
+          Inventory Slot
+        </option>
+
+        <option
+          value="loose"
+          {{#if (eq systemData.carryMode "loose")}}
+            selected
+          {{/if}}
+        >
+          Carried Loosely
+        </option>
+
+        <option
+          value="backpack"
+          {{#if (eq systemData.carryMode "backpack")}}
+            selected
+          {{/if}}
+        >
+          Backpack
+        </option>
+
+        <option
+          value="bulky"
+          {{#if (eq systemData.carryMode "bulky")}}
+            selected
+          {{/if}}
+        >
+          Bulky / In Hands
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <p class="hint">
+      Bulky / In Hands is for cumbersome objects that prevent normal
+      operation, such as a chest or strongbox. Heavy weapons still use
+      one normal Inventory Slot.
+    </p>
+
+
+    <!-- EQUIPPABLE -->
+
+    {{#if isInherentlyEquippable}}
+
+      <div class="form-group">
+
+        <label>
+          Equippable
+        </label>
+
+        <span class="hint">
+          Yes — {{#if isWeapon}}Weapon{{else}}Armor{{/if}}
+        </span>
+
       </div>
-    </div>
-  </section>
-</form>
 
+    {{else}}
+
+      <div class="form-group">
+
+        <label>
+          Equippable
+        </label>
+
+        <input
+          type="checkbox"
+          name="system.equippable"
+          {{checked systemData.equippable}}
+        />
+
+      </div>
+
+    {{/if}}
+
+
+    <!-- EQUIPPED STATE -->
+
+    {{#if isOwnedByCharacter}}
+
+
+      {{#if canEquipHere}}
+
+        <div class="form-group">
+
+          <label>
+            Equipped
+          </label>
+
+          <input
+            type="checkbox"
+            name="system.equipped"
+            {{checked systemData.equipped}}
+          />
+
+        </div>
+
+
+      {{else}}
+
+
+        {{#if isEquippable}}
+
+          <div class="form-group">
+
+            <label>
+              Equipped
+            </label>
+
+            <span class="hint">
+              Move this Item into a numbered Inventory Slot before equipping it.
+            </span>
+
+          </div>
+
+        {{/if}}
+
+
+      {{/if}}
+
+
+    {{/if}}
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- CHARGES                                                -->
+  <!-- ====================================================== -->
+
+  <section class="delver-item-section">
+
+    <h2>
+      Charges
+    </h2>
+
+
+    <div class="form-group">
+
+      <label>
+        Uses Charges
+      </label>
+
+      <input
+        type="checkbox"
+        name="system.charges.enabled"
+        {{checked systemData.charges.enabled}}
+      />
+
+    </div>
+
+
+    {{#if hasCharges}}
+
+      <div class="delver-item-inline">
+
+        <div class="form-group">
+
+          <label>
+            Current
+          </label>
+
+          <input
+            type="number"
+            name="system.charges.current"
+            value="{{systemData.charges.current}}"
+            min="0"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Max
+          </label>
+
+          <input
+            type="number"
+            name="system.charges.max"
+            value="{{systemData.charges.max}}"
+            min="0"
+          />
+
+        </div>
+
+      </div>
+
+    {{/if}}
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- WEAPON                                                 -->
+  <!-- ====================================================== -->
+
+  {{#if isWeapon}}
+
+    <section class="delver-item-section">
+
+      <h2>
+        Weapon
+      </h2>
+
+
+      <div class="form-group">
+
+        <label>
+          Weapon Class
+        </label>
+
+        <select
+          name="system.weapon.class"
+        >
+
+          <option
+            value=""
+            {{#if (eq systemData.weapon.class "")}}
+              selected
+            {{/if}}
+          >
+            —
+          </option>
+
+          <option
+            value="light"
+            {{#if (eq systemData.weapon.class "light")}}
+              selected
+            {{/if}}
+          >
+            Light
+          </option>
+
+          <option
+            value="balanced"
+            {{#if (eq systemData.weapon.class "balanced")}}
+              selected
+            {{/if}}
+          >
+            Balanced
+          </option>
+
+          <option
+            value="heavy"
+            {{#if (eq systemData.weapon.class "heavy")}}
+              selected
+            {{/if}}
+          >
+            Heavy
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Damage Die
+        </label>
+
+        <select
+          name="system.weapon.die"
+        >
+
+          <option
+            value=""
+            {{#if (eq systemData.weapon.die "")}}
+              selected
+            {{/if}}
+          >
+            —
+          </option>
+
+          <option
+            value="d4"
+            {{#if (eq systemData.weapon.die "d4")}}
+              selected
+            {{/if}}
+          >
+            d4
+          </option>
+
+          <option
+            value="d6"
+            {{#if (eq systemData.weapon.die "d6")}}
+              selected
+            {{/if}}
+          >
+            d6
+          </option>
+
+          <option
+            value="d8"
+            {{#if (eq systemData.weapon.die "d8")}}
+              selected
+            {{/if}}
+          >
+            d8
+          </option>
+
+          <option
+            value="d10"
+            {{#if (eq systemData.weapon.die "d10")}}
+              selected
+            {{/if}}
+          >
+            d10
+          </option>
+
+        </select>
+
+      </div>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- ARMOR                                                  -->
+  <!-- ====================================================== -->
+
+  {{#if isArmor}}
+
+    <section class="delver-item-section">
+
+      <h2>
+        Armor
+      </h2>
+
+
+      <div class="form-group">
+
+        <label>
+          Defense Bonus
+        </label>
+
+        <input
+          type="number"
+          name="system.armor.defense"
+          value="{{systemData.armor.defense}}"
+          step="1"
+        />
+
+      </div>
+
+
+      <p class="hint">
+        Standard armor normally provides +1 Defense.
+        This field stays editable for magical or unusual equipment.
+      </p>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- SPELL VESSEL                                           -->
+  <!-- ====================================================== -->
+
+  {{#if isSpellVessel}}
+
+    <section class="delver-item-section">
+
+      <h2>
+        Spell Vessel
+      </h2>
+
+      <p class="hint">
+        Spell-specific mechanics are intentionally freeform for now.
+        Use the description below for spell rules and effects.
+      </p>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- DESCRIPTION                                            -->
+  <!-- ====================================================== -->
+
+  <section class="delver-item-section delver-item-description">
+
+    <h2>
+      Description / Notes
+    </h2>
+
+    <textarea
+      name="system.description"
+      placeholder="Description, rules, effects, notes..."
+    >{{systemData.description}}</textarea>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- SAVE                                                   -->
+  <!-- ====================================================== -->
+
+  <footer class="delver-item-footer">
+
+    <button type="submit">
+
+      <i class="fas fa-save"></i>
+
+      Save
+
+    </button>
+
+  </footer>
+
+</form>

@@ -2,24 +2,126 @@
   "Actor": {
     "types": ["character", "npc", "enemy"],
     "htmlFields": ["notes"],
+
     "character": {
-      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
-      "luck": { "current": 0, "max": 0 },
-      "speed": { "baseOverride": null },
-      "inventory": { "slots": [] },
-      "notes": "",
-      "carriedLoosely": ""
-    },
-    "npc": {
-      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
-      "luck": { "current": 0, "max": 0 },
-      "speed": { "baseOverride": null },
+      "identity": {
+        "level": 1,
+        "background": "",
+        "race": "",
+        "uniqueAbility": {
+          "name": "",
+          "description": ""
+        }
+      },
+
+      "abilities": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+
+      "resources": {
+        "hp": {
+          "current": 1,
+          "max": 1
+        },
+
+        "luck": {
+          "current": 0,
+          "max": 20
+        },
+
+        "scars": 0,
+
+        "actionPoints": {
+          "current": 3,
+          "base": 3
+        }
+      },
+
+      "defense": {
+        "override": null
+      },
+
+      "movement": {
+        "override": null
+      },
+
+      "inventory": {
+        "slots": [
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" },
+          { "kind": "empty", "itemId": "", "label": "" }
+        ]
+      },
+
       "notes": ""
     },
+
+    "npc": {
+      "abilities": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+
+      "luck": {
+        "current": 0,
+        "max": 0
+      },
+
+      "speed": {
+        "baseOverride": null
+      },
+
+      "notes": ""
+    },
+
     "enemy": {
-      "abilities": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
-      "luck": { "current": 0, "max": 0 },
-      "speed": { "baseOverride": null },
+      "abilities": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+
+      "luck": {
+        "current": 0,
+        "max": 0
+      },
+
+      "speed": {
+        "baseOverride": null
+      },
+
       "notes": ""
     }
   },
@@ -27,12 +129,31 @@
   "Item": {
     "types": ["item"],
     "htmlFields": ["description"],
+
     "item": {
       "description": "",
-      "quantity": 1,
-      "weight": 0,
-      "attributes": {},
-      "groups": {}
+
+      "category": "misc",
+
+      "carryMode": "slot",
+
+      "equippable": false,
+      "equipped": false,
+
+      "charges": {
+        "enabled": false,
+        "current": 0,
+        "max": 0
+      },
+
+      "weapon": {
+        "class": "",
+        "die": ""
+      },
+
+      "armor": {
+        "defense": 1
+      }
     }
   }
 }

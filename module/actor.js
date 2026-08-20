@@ -1,176 +1,45 @@
-import { EntitySheetHelper } from "./helper.js";
-
 /**
- * Extend the base Actor document to support attributes and groups with a custom template creation dialog.
- * @extends {Actor}
+ * Delver Actor document.
+ *
+ * Keep this class intentionally lightweight.
+ * Actor-specific game rules should only be added here when they
+ * genuinely belong to the Actor document rather than a sheet.
  */
 export class SimpleActor extends Actor {
 
-  /** @inheritdoc */
+  /**
+   * Prepare derived Actor data.
+   *
+   * Most Delver derived values are currently calculated by the sheet.
+   * This method remains available for system-wide derived values later.
+   */
   prepareDerivedData() {
     super.prepareDerivedData();
-    this.system.groups = this.system.groups || {};
-    this.system.attributes = this.system.attributes || {};
-    EntitySheetHelper.clampResourceValues(this.system.attributes);
   }
-
-  /* -------------------------------------------- */
-
-  /** @override */
-  static async createDialog(data = {}, options = {}) {
-    return EntitySheetHelper.createDialog.call(this, data, options);
-  }
-
-  /* -------------------------------------------- */
 
   /**
-   * Is this Actor used as a template for other Actors?
-   * @type {boolean}
+   * Supply Actor data for rolls and formulas.
+   *
+   * Embedded Items are exposed by slugified name so they can eventually
+   * participate in Delver rolls without bringing back Simple
+   * Worldbuilding's arbitrary attribute/group system.
    */
-  get isTemplate() {
-    return !!this.getFlag("delver", "isTemplate");
-  }
-
-  /* -------------------------------------------- */
-  /*  Roll Data Preparation                       */
-  /* -------------------------------------------- */
-
-  /** @inheritdoc */
   getRollData() {
-    const data = this.toObject(false).system;
-    const shorthand = game.settings.get("delver", "macroShorthand");
-    const formulaAttributes = [];
-    const itemAttributes = [];
+    const data = foundry.utils.deepClone(this.system ?? {});
 
-    this._applyShorthand(data, formulaAttributes, shorthand);
-    this._applyItems(data, itemAttributes, shorthand);
-    this._applyItemsFormulaReplacements(data, itemAttributes, shorthand);
-    this._applyFormulaReplacements(data, formulaAttributes, shorthand);
+    data.items = this.items.reduce((items, item) => {
+      const key = item.name.slugify({ strict: true });
 
-    if (shorthand) {
-      delete data.attributes;
-      delete data.attr;
-      delete data.groups;
-    }
+      items[key] = {
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        ...foundry.utils.deepClone(item.system ?? {})
+      };
+
+      return items;
+    }, {});
 
     return data;
-  }
-
-  _applyShorthand(data, formulaAttributes, shorthand) {
-    for (let [k, v] of Object.entries(data.attributes || {})) {
-      if (v.dtype === "Formula") formulaAttributes.push(k);
-      if (shorthand && !(k in data)) {
-        if (v.dtype) {
-          data[k] = v.value;
-        } else {
-          data[k] = {};
-          for (let [gk, gv] of Object.entries(v)) {
-            data[k][gk] = gv.value;
-            if (gv.dtype === "Formula") formulaAttributes.push(`${k}.${gk}`);
-          }
-        }
-      }
-    }
-  }
-
-  _applyItems(data, itemAttributes, shorthand) {
-    data.items = this.items.reduce((obj, item) => {
-      const key = item.name.slugify({ strict: true });
-      const itemData = item.toObject(false).system;
-
-      for (let [k, v] of Object.entries(itemData.attributes)) {
-        if (v.dtype === "Formula") itemAttributes.push(`${key}..${k}`);
-
-        if (shorthand && !(k in itemData)) {
-          if (v.dtype) {
-            itemData[k] = v.value;
-          } else {
-            if (!itemData[k]) itemData[k] = {};
-            for (let [gk, gv] of Object.entries(v)) {
-              itemData[k][gk] = gv.value;
-              if (gv.dtype === "Formula") itemAttributes.push(`${key}..${k}.${gk}`);
-            }
-          }
-        } else if (!v.dtype) {
-          if (!itemData[k]) itemData[k] = {};
-          for (let [gk, gv] of Object.entries(v)) {
-            itemData[k][gk] = gv.value;
-            if (gv.dtype === "Formula") itemAttributes.push(`${key}..${k}.${gk}`);
-          }
-        }
-      }
-
-      if (shorthand) delete itemData.attributes;
-      obj[key] = itemData;
-      return obj;
-    }, {});
-  }
-
-  _applyItemsFormulaReplacements(data, itemAttributes, shorthand) {
-    for (let k of itemAttributes) {
-      let [item, key] = k.split("..");
-      let gk = null;
-      if (key.includes(".")) {
-        [key, gk] = key.split(".");
-      }
-
-      let formula = "";
-      if (shorthand) {
-        if (data.items[item]?.[key]?.[gk]) {
-          formula = data.items[item][key][gk].replace("@item.", `@items.${item}.`);
-          data.items[item][key][gk] = Roll.replaceFormulaData(formula, data);
-        } else if (data.items[item]?.[key]) {
-          formula = data.items[item][key].replace("@item.", `@items.${item}.`);
-          data.items[item][key] = Roll.replaceFormulaData(formula, data);
-        }
-      } else {
-        if (data.items[item]?.attributes?.[key]?.[gk]) {
-          formula = data.items[item].attributes[key][gk].value.replace("@item.", `@items.${item}.attributes.`);
-          data.items[item].attributes[key][gk].value = Roll.replaceFormulaData(formula, data);
-        } else if (data.items[item]?.attributes?.[key]?.value) {
-          formula = data.items[item].attributes[key].value.replace("@item.", `@items.${item}.attributes.`);
-          data.items[item].attributes[key].value = Roll.replaceFormulaData(formula, data);
-        }
-      }
-    }
-  }
-
-  _applyFormulaReplacements(data, formulaAttributes, shorthand) {
-    for (let k of formulaAttributes) {
-      let attr = null;
-      if (k.includes(".")) {
-        [k, attr] = k.split(".");
-      }
-
-      if (data.attributes?.[k]?.value) {
-        data.attributes[k].value = Roll.replaceFormulaData(String(data.attributes[k].value), data);
-      } else if (attr && data.attributes?.[k]?.[attr]?.value) {
-        data.attributes[k][attr].value = Roll.replaceFormulaData(String(data.attributes[k][attr].value), data);
-      }
-
-      if (shorthand) {
-        if (data.attributes?.[k]?.value) {
-          data[k] = data.attributes[k].value;
-        } else if (attr) {
-          if (!data[k]) data[k] = {};
-          data[k][attr] = data.attributes[k][attr].value;
-        }
-      }
-    }
-  }
-
-  /* -------------------------------------------- */
-
-  /** @inheritdoc */
-  async modifyTokenAttribute(attribute, value, isDelta = false, isBar = true) {
-    const current = foundry.utils.getProperty(this.system, attribute);
-    if (!isBar || !isDelta || (current?.dtype !== "Resource")) {
-      return super.modifyTokenAttribute(attribute, value, isDelta, isBar);
-    }
-    const updates = {
-      [`system.${attribute}.value`]: Math.clamped(current.value + value, current.min, current.max)
-    };
-    const allowed = Hooks.call("modifyTokenAttribute", { attribute, value, isDelta, isBar }, updates);
-    return allowed !== false ? this.update(updates) : this;
   }
 }

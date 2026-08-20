@@ -1,248 +1,764 @@
-<form class="delver-sheet" autocomplete="off">
+<form
+  class="delver-sheet delver-character-v2"
+  autocomplete="off"
+>
+
+  <!-- ====================================================== -->
+  <!-- HEADER                                                 -->
+  <!-- ====================================================== -->
+
   <header class="delver-header header-12">
-    <!-- NAME (col 1-6) -->
-    <div class="name name-inline header-row1">
-      <label>Name</label>
-      <input type="text" name="name" value="{{actor.name}}" placeholder="Name" />
+
+    <div class="name-inline">
+
+      <label>
+        Name
+      </label>
+
+      <input
+        type="text"
+        name="name"
+        value="{{actor.name}}"
+        placeholder="Character Name"
+      />
+
     </div>
 
-    <!-- LUCK DISPLAY (col 7) -->
-    <div class="luck luck-display header-row1">
-      <div class="luck-title">Luck</div>
-      <div class="luck-ratio">
-        <input
-          class="luck-plain"
-          type="number"
-          name="system.luck.current"
-          value="{{systemData.luck.current}}"
-          min="0"
-          max="{{systemData.luck.max}}"
-        />
-        <span class="luck-slash">/</span>
-        <input
-          class="luck-plain"
-          type="number"
-          name="system.luck.max"
-          value="{{systemData.luck.max}}"
-          min="0"
-        />
+
+    <div class="header-resource hp-display">
+
+      <div class="header-stat-label-row">
+
+        <label>
+          HP
+        </label>
+
+        <button
+          class="take-damage-action"
+          type="button"
+          title="Take Damage"
+          {{#unless isEditable}}disabled{{/unless}}
+        >
+          <i class="fas fa-heart-crack"></i>
+        </button>
+
       </div>
+
+
+      <div class="resource-ratio">
+
+        <input
+          type="number"
+          name="system.resources.hp.current"
+          value="{{systemData.resources.hp.current}}"
+          min="0"
+        />
+
+        <span>/</span>
+
+        <input
+          type="number"
+          name="system.resources.hp.max"
+          value="{{systemData.resources.hp.max}}"
+          min="0"
+        />
+
+      </div>
+
     </div>
 
-    <!-- LUCK CONTROLS (col 8) -->
-    <div class="luck luck-controls header-row1">
-      <!-- Cur + Max controls should be INLINE (horizontal), not stacked -->
-      <div class="luck-controls-stack">
-        <div class="luck-vstack">
-          <div class="luck-mini">Cur</div>
-          <button
-            type="button"
-            class="luck-step"
-            data-luck-field="current"
-            data-step="1"
-            aria-label="Luck cur plus"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            class="luck-step"
-            data-luck-field="current"
-            data-step="-1"
-            aria-label="Luck cur minus"
-          >
-            -
-          </button>
+
+    <div class="header-resource luck-display">
+
+      <div class="header-stat-label-row">
+
+        <label>
+          Luck
+        </label>
+
+        <button
+          class="spend-luck-action"
+          type="button"
+          title="Spend 1 Luck"
+          {{#unless isEditable}}disabled{{/unless}}
+          {{#if (eq systemData.resources.luck.current 0)}}disabled{{/if}}
+        >
+          −1
+        </button>
+
+      </div>
+
+
+      <div class="resource-ratio">
+
+        <input
+          type="number"
+          name="system.resources.luck.current"
+          value="{{systemData.resources.luck.current}}"
+          min="0"
+          max="20"
+        />
+
+        <span>/ 20</span>
+
+      </div>
+
+    </div>
+
+
+    <div class="header-derived defense-display">
+
+      <label>
+        Defense
+      </label>
+
+      <div class="big">
+        {{derived.defense}}
+      </div>
+
+    </div>
+
+
+    <div class="header-derived speed-display">
+
+      <label>
+        Speed
+      </label>
+
+      <div class="big">
+        {{derived.speed}} ft
+      </div>
+
+    </div>
+
+
+    <div class="header-meta">
+
+      <div class="meta-field">
+
+        <label>
+          Level
+        </label>
+
+        <input
+          type="number"
+          name="system.identity.level"
+          value="{{systemData.identity.level}}"
+          min="0"
+        />
+
+      </div>
+
+
+      <div class="meta-field">
+
+        <label>
+          Scars
+        </label>
+
+        <input
+          type="number"
+          name="system.resources.scars"
+          value="{{systemData.resources.scars}}"
+          min="0"
+        />
+
+      </div>
+
+
+      <div class="meta-field">
+
+        <label>
+          AP
+        </label>
+
+        <div class="small-ratio">
+
+          <input
+            type="number"
+            name="system.resources.actionPoints.current"
+            value="{{systemData.resources.actionPoints.current}}"
+            min="0"
+          />
+
+          <span>/</span>
+
+          <input
+            type="number"
+            name="system.resources.actionPoints.base"
+            value="{{systemData.resources.actionPoints.base}}"
+            min="0"
+          />
+
         </div>
 
-        <div class="luck-vstack">
-          <div class="luck-mini">Max</div>
-          <button
-            type="button"
-            class="luck-step"
-            data-luck-field="max"
-            data-step="1"
-            aria-label="Luck max plus"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            class="luck-step"
-            data-luck-field="max"
-            data-step="-1"
-            aria-label="Luck max minus"
-          >
-            -
-          </button>
-        </div>
       </div>
+
     </div>
 
-    <!-- DEFENSE (col 9-10) -->
-    <div class="defense defense-inline header-row1">
-      <label>Defense</label>
-      <div class="big">{{derived.defense}}</div>
+
+    <div class="header-overrides">
+
+      <div class="override-field">
+
+        <label>
+          Defense Override
+        </label>
+
+        <input
+          type="number"
+          name="system.defense.override"
+          value="{{systemData.defense.override}}"
+          placeholder="Auto"
+        />
+
+      </div>
+
+
+      <div class="override-field">
+
+        <label>
+          Speed Override
+        </label>
+
+        <input
+          type="number"
+          name="system.movement.override"
+          value="{{systemData.movement.override}}"
+          placeholder="Auto"
+        />
+
+      </div>
+
     </div>
 
-    <!-- SPEED (col 11-12) -->
-    <div class="speed speed-inline header-row1">
-      <label>Speed (ft)</label>
-      <div class="big">{{derived.baseSpeed}}</div>
-    </div>
-
-    <!-- SUBLINE: Fort/Ref/Will at col 9-10 -->
-    <div class="header-subline-left header-row2">
-      Fort {{derived.fort}} · Ref {{derived.reflex}} · Will {{derived.will}}
-    </div>
-
-    <!-- SUBLINE: Computed at col 11-12 -->
-    <div class="header-subline-right header-row2">
-      Computed {{derived.computedSpeed}}
-    </div>
   </header>
 
+
+  <!-- ====================================================== -->
+  <!-- ABILITIES                                              -->
+  <!-- ====================================================== -->
+
   <section class="delver-abilities">
+
     <div class="ability">
       <label>STR</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="STR minus">-</button>
-        <input type="number" name="system.abilities.str" value="{{systemData.abilities.str}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="STR plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.str" value="{{systemData.abilities.str}}" min="-10" max="10" />
     </div>
 
     <div class="ability">
       <label>DEX</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="DEX minus">-</button>
-        <input type="number" name="system.abilities.dex" value="{{systemData.abilities.dex}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="DEX plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.dex" value="{{systemData.abilities.dex}}" min="-10" max="10" />
     </div>
 
     <div class="ability">
       <label>CON</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="CON minus">-</button>
-        <input type="number" name="system.abilities.con" value="{{systemData.abilities.con}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="CON plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.con" value="{{systemData.abilities.con}}" min="-10" max="10" />
     </div>
 
     <div class="ability">
       <label>INT</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="INT minus">-</button>
-        <input type="number" name="system.abilities.int" value="{{systemData.abilities.int}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="INT plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.int" value="{{systemData.abilities.int}}" min="-10" max="10" />
     </div>
 
     <div class="ability">
       <label>WIS</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="WIS minus">-</button>
-        <input type="number" name="system.abilities.wis" value="{{systemData.abilities.wis}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="WIS plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.wis" value="{{systemData.abilities.wis}}" min="-10" max="10" />
     </div>
 
     <div class="ability">
       <label>CHA</label>
-      <div class="num-stepper">
-        <button type="button" class="num-step" data-step="-1" aria-label="CHA minus">-</button>
-        <input type="number" name="system.abilities.cha" value="{{systemData.abilities.cha}}" min="-10" max="10" />
-        <button type="button" class="num-step" data-step="1" aria-label="CHA plus">+</button>
-      </div>
+      <input class="ability-value" type="number" name="system.abilities.cha" value="{{systemData.abilities.cha}}" min="-10" max="10" />
     </div>
+
   </section>
+
+
+  <!-- ====================================================== -->
+  <!-- IDENTITY                                               -->
+  <!-- ====================================================== -->
+
+  <section class="delver-identity">
+
+    <div class="identity-field">
+
+      <label>
+        Background
+      </label>
+
+      <input
+        type="text"
+        name="system.identity.background"
+        value="{{systemData.identity.background}}"
+        placeholder="Background"
+      />
+
+    </div>
+
+
+    <div class="identity-field">
+
+      <label>
+        Race
+      </label>
+
+      <input
+        type="text"
+        name="system.identity.race"
+        value="{{systemData.identity.race}}"
+        placeholder="Race"
+      />
+
+    </div>
+
+
+    <div class="identity-field unique-ability-name">
+
+      <label>
+        Unique Ability
+      </label>
+
+      <input
+        type="text"
+        name="system.identity.uniqueAbility.name"
+        value="{{systemData.identity.uniqueAbility.name}}"
+        placeholder="Ability Name"
+      />
+
+    </div>
+
+
+    <div class="identity-field unique-ability-description">
+
+      <label>
+        Ability Description
+      </label>
+
+      <textarea
+        name="system.identity.uniqueAbility.description"
+        placeholder="Describe the character's unique ability..."
+      >{{systemData.identity.uniqueAbility.description}}</textarea>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- INVENTORY                                              -->
+  <!-- ====================================================== -->
 
   <section class="delver-inventory">
-    <div class="inv-header inv-header-12">
-      <h2>Inventory Slots ({{derived.totalSlots}})</h2>
 
-      <div class="inv-bar">
-        <button type="button" class="inv-add inv-add-item" data-add-kind="item">+ Item</button>
-        <button type="button" class="inv-add inv-add-fatigue" data-add-kind="fatigue">+ Fatigue</button>
-        <button type="button" class="inv-add inv-add-wound" data-add-kind="wound">+ Wound</button>
+    <div class="inventory-heading">
 
-        <div class="inv-wound-control">
-          <button type="button" class="inv-wound-step" data-wound-step="-1" aria-label="Wound DC minus">-</button>
-          <input class="inv-wound-dc" type="number" value="20" min="0" step="1" />
-          <button type="button" class="inv-wound-step" data-wound-step="1" aria-label="Wound DC plus">+</button>
+      <div>
+
+        <h2>
+          Inventory
+        </h2>
+
+        <div class="inventory-summary">
+          {{derived.usedSlots}} used
+          ·
+          {{derived.inventoryCapacity}} available
+          ·
+          {{derived.inventoryMax}} max
         </div>
+
       </div>
 
-      <div class="inv-spacer"></div>
+
+      <div class="inventory-status">
+
+        <span>
+          Wounds: {{derived.wounds}}
+        </span>
+
+        <span>
+          Fatigue: {{derived.fatigue}}
+        </span>
+
+
+        {{#if derived.overCapacity}}
+
+          <span class="over-capacity-warning">
+            Over Capacity:
+            {{derived.overCapacity}}
+          </span>
+
+        {{/if}}
+
+      </div>
+
     </div>
 
-    <div class="slot-columns slot-columns-tight">
-      {{#each inventorySlots as |slot idx|}}
-        <div class="inv-slot kind-{{slot.kind}}" data-index="{{idx}}">
-          <div class="slot-main">
-            <!-- Hidden dropdown (kept for data pipeline) -->
-            <select class="slot-kind" aria-hidden="true" tabindex="-1">
-              <option value="empty" {{#if (eq slot.kind "empty")}}selected{{/if}}>Empty</option>
-              <option value="item" {{#if (eq slot.kind "item")}}selected{{/if}}>Item</option>
-              <option value="fatigue" {{#if (eq slot.kind "fatigue")}}selected{{/if}}>Fatigue</option>
-              <option value="wound" {{#if (eq slot.kind "wound")}}selected{{/if}}>Wound</option>
-            </select>
 
-            <!-- Visible type chip -->
-            <span class="slot-chip">
-              {{#if (eq slot.kind "wound")}}Wound
-              {{else}}
-                {{#if (eq slot.kind "fatigue")}}Fatigue
+    <div class="inventory-drop-help">
+      Drag Items between carrying locations · Right-click for actions
+    </div>
+
+
+    <div class="slot-columns">
+
+      {{#each inventorySlots as |slot|}}
+
+        <div
+          class="
+            inv-slot
+            kind-{{slot.kind}}
+            {{#unless slot.available}}slot-unavailable{{/unless}}
+            {{#if slot.overCapacity}}slot-over-capacity{{/if}}
+          "
+          data-index="{{slot.index}}"
+          data-kind="{{slot.kind}}"
+          data-available="{{slot.available}}"
+        >
+
+          <div class="slot-number">
+            {{slot.number}}
+          </div>
+
+
+          <div class="slot-content">
+
+            {{#if slot.occupied}}
+
+              {{#if (eq slot.kind "item")}}
+
+                {{#if slot.hasEmbeddedItem}}
+
+                  <div
+                    class="delver-owned-item slot-item"
+                    data-item-id="{{slot.itemId}}"
+                    draggable="true"
+                    title="Right-click for actions · Double-click to open"
+                  >
+
+                    <img
+                      class="slot-item-image"
+                      src="{{slot.itemImg}}"
+                      alt=""
+                    />
+
+                    <span class="slot-display-label">
+                      {{slot.displayLabel}}
+                    </span>
+
+                  </div>
+
                 {{else}}
-                  {{#if (eq slot.kind "item")}}Item
-                  {{else}}Empty{{/if}}
+
+                  <span class="slot-chip">
+                    Item
+                  </span>
+
+                  <span class="slot-display-label">
+                    {{slot.displayLabel}}
+                  </span>
+
+                  <span class="slot-legacy-label">
+                    Legacy
+                  </span>
+
                 {{/if}}
+
+              {{else}}
+
+                <span
+                  class="slot-chip"
+                  title="Right-click for actions"
+                >
+                  {{slot.kindLabel}}
+                </span>
+
+                <span class="slot-display-label">
+                  {{slot.displayLabel}}
+                </span>
+
               {{/if}}
+
+
+              {{#if slot.overCapacity}}
+
+                <span class="slot-capacity-label danger">
+                  Over Capacity
+                </span>
+
+              {{/if}}
+
+            {{else}}
+
+              {{#if slot.available}}
+
+                <span class="slot-empty-label">
+                  Drop Item Here
+                </span>
+
+              {{else}}
+
+                <span class="slot-capacity-label">
+                  Unavailable
+                </span>
+
+              {{/if}}
+
+            {{/if}}
+
+          </div>
+
+        </div>
+
+      {{/each}}
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- OTHER CARRY LOCATIONS                                  -->
+  <!-- ====================================================== -->
+
+  <section class="delver-carry-locations">
+
+
+    <div
+      class="carry-zone"
+      data-carry-target="loose"
+    >
+
+      <div class="carry-zone-heading">
+        <h3>Carried Loosely</h3>
+        <span>No Slot</span>
+      </div>
+
+      <div class="carry-item-list">
+
+        {{#if hasCarriedLooselyItems}}
+
+          {{#each carriedLooselyItems as |item|}}
+
+            <div
+              class="delver-owned-item carry-item"
+              data-item-id="{{item.id}}"
+              draggable="true"
+              title="Right-click for actions · Double-click to open"
+            >
+
+              <img src="{{item.img}}" alt="" />
+
+              <span class="carry-item-name">
+                {{item.name}}
+              </span>
+
+              <span class="carry-item-type">
+                {{item.categoryLabel}}
+              </span>
+
+            </div>
+
+          {{/each}}
+
+        {{else}}
+
+          <div class="carry-empty">
+            Drop Items Here
+          </div>
+
+        {{/if}}
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="carry-zone"
+      data-carry-target="backpack"
+    >
+
+      <div class="carry-zone-heading">
+        <h3>Backpack</h3>
+        <span>1 Minute Access</span>
+      </div>
+
+      <div class="carry-item-list">
+
+        {{#if hasBackpackItems}}
+
+          {{#each backpackItems as |item|}}
+
+            <div
+              class="delver-owned-item carry-item"
+              data-item-id="{{item.id}}"
+              draggable="true"
+              title="Right-click for actions · Double-click to open"
+            >
+
+              <img src="{{item.img}}" alt="" />
+
+              <span class="carry-item-name">
+                {{item.name}}
+              </span>
+
+              <span class="carry-item-type">
+                {{item.categoryLabel}}
+              </span>
+
+            </div>
+
+          {{/each}}
+
+        {{else}}
+
+          <div class="carry-empty">
+            Drop Items Here
+          </div>
+
+        {{/if}}
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="carry-zone"
+      data-carry-target="bulky"
+    >
+
+      <div class="carry-zone-heading">
+        <h3>Bulky / In Hands</h3>
+        <span>Encumbering</span>
+      </div>
+
+      <div class="carry-item-list">
+
+        {{#if hasBulkyItems}}
+
+          {{#each bulkyItems as |item|}}
+
+            <div
+              class="delver-owned-item carry-item"
+              data-item-id="{{item.id}}"
+              draggable="true"
+              title="Right-click for actions · Double-click to open"
+            >
+
+              <img src="{{item.img}}" alt="" />
+
+              <span class="carry-item-name">
+                {{item.name}}
+              </span>
+
+              <span class="carry-item-type">
+                {{item.categoryLabel}}
+              </span>
+
+            </div>
+
+          {{/each}}
+
+        {{else}}
+
+          <div class="carry-empty">
+            Drop Items Here
+          </div>
+
+        {{/if}}
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- DROPPED / UNASSIGNED                                   -->
+  <!-- ====================================================== -->
+
+  {{#if hasUnassignedSlotItems}}
+
+    <section class="delver-unassigned">
+
+      <h3>
+        Dropped / Unassigned Items
+      </h3>
+
+      <p>
+        These Items still belong to the Character, but are not
+        assigned to a valid carried inventory slot. This includes
+        Items deliberately dropped during damage resolution and
+        Items caught by Delver's inventory safety checks.
+      </p>
+
+
+      <div class="carry-item-list">
+
+        {{#each unassignedSlotItems as |item|}}
+
+          <div
+            class="delver-owned-item carry-item"
+            data-item-id="{{item.id}}"
+            draggable="true"
+            title="Right-click for actions · Drag into an available slot"
+          >
+
+            <img src="{{item.img}}" alt="" />
+
+            <span class="carry-item-name">
+              {{item.name}}
             </span>
 
-            <input class="slot-label" type="text" value="{{slot.label}}" placeholder="Item / description" />
-
-            <!-- Right-side controls: DC (wound only) + remove (non-empty only) -->
-            <div class="slot-actions">
-              {{#if (eq slot.kind "wound")}}
-                <div class="slot-dc">
-                  <span class="slot-dc-label">DC:</span>
-                  <input class="slot-value slot-dc-input" type="text" value="{{slot.value}}" placeholder="##" />
-                </div>
-              {{/if}}
-
-              {{#unless (eq slot.kind "empty")}}
-                <button
-                  type="button"
-                  class="slot-remove"
-                  data-action="slot-remove"
-                  aria-label="Remove from slot"
-                  title="Clear slot"
-                >
-                  ×
-                </button>
-              {{/unless}}
-            </div>
           </div>
-        </div>
-      {{/each}}
-    </div>
-  </section>
+
+        {{/each}}
+
+      </div>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- NOTES                                                  -->
+  <!-- ====================================================== -->
 
   <section class="delver-notes">
-    <div class="notes-col">
-      <h2>Notes</h2>
-      <textarea name="system.notes">{{systemData.notes}}</textarea>
-    </div>
 
     <div class="notes-col">
-      <h2>Carried Loosely</h2>
-      <textarea name="system.carriedLoosely">{{systemData.carriedLoosely}}</textarea>
+
+      <h2>
+        Notes
+      </h2>
+
+      <textarea
+        name="system.notes"
+        placeholder="Character notes..."
+      >{{systemData.notes}}</textarea>
+
     </div>
+
   </section>
 
+
+  <!-- ====================================================== -->
+  <!-- SAVE                                                   -->
+  <!-- ====================================================== -->
+
   <footer class="delver-footer">
-    <button type="submit"><i class="fas fa-save"></i> Save</button>
+
+    <button type="submit">
+
+      <i class="fas fa-save"></i>
+
+      Save
+
+    </button>
+
   </footer>
+
 </form>
