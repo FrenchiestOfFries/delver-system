@@ -161,67 +161,41 @@ function normalizeInventorySlots(
 
 function buildDamageSnapshot(actor) {
 
-  const hp =
-    Math.max(
-      0,
-
-      integerOr(
-        actor.system
-          ?.resources
-          ?.hp
-          ?.current,
-
-        0
-      )
-    );
-
-
-  const luck =
-    Math.max(
-      0,
-
-      integerOr(
-        actor.system
-          ?.resources
-          ?.luck
-          ?.current,
-
-        0
-      )
-    );
-
-
-  const con =
+  const hp = Math.max(
+    0,
     integerOr(
-      actor.system
-        ?.abilities
-        ?.con,
-
+      actor.system?.resources?.hp?.current,
       0
-    );
+    )
+  );
 
+  const luck = Math.max(
+    0,
+    integerOr(
+      actor.system?.resources?.luck?.current,
+      0
+    )
+  );
 
-  const capacity =
-    clamp(
-      DELVER_BASE_INVENTORY_SLOTS +
-        con,
+  const con = integerOr(
+    actor.system?.abilities?.con,
+    0
+  );
 
-      0,
-      DELVER_MAX_INVENTORY_SLOTS
-    );
+  const capacity = clamp(
+    DELVER_BASE_INVENTORY_SLOTS + con,
+    0,
+    DELVER_MAX_INVENTORY_SLOTS
+  );
 
-
-  const slots =
-    normalizeInventorySlots(
-      actor.system
-        ?.inventory
-        ?.slots
-    );
+  const slots = normalizeInventorySlots(
+    actor.system?.inventory?.slots
+  );
 
 
   /*
-   * Stale Item references behave like empty slots
-   * during damage resolution.
+   * Missing Item references, including their reservations,
+   * behave like empty space during damage resolution.
    */
   for (
     let index = 0;
@@ -229,17 +203,16 @@ function buildDamageSnapshot(actor) {
     index++
   ) {
 
-    const slot =
-      slots[index];
-
+    const slot = slots[index];
 
     if (
-      slot.kind === "item" &&
+      (
+        slot.kind === "item" ||
+        slot.kind === "reserved"
+      ) &&
       (
         !slot.itemId ||
-        !actor.items.get(
-          slot.itemId
-        )
+        !actor.items.get(slot.itemId)
       )
     ) {
 
@@ -249,19 +222,16 @@ function buildDamageSnapshot(actor) {
   }
 
 
-  const emptyIndices =
-    [];
-
-
-  const itemEntries =
-    [];
+  const emptyIndices = [];
+  const itemEntries = [];
+  const seenItemIds = new Set();
 
 
   /*
-   * Only slots inside the Character's current CON
-   * capacity can absorb new Wounds.
+   * Multi-slot Items appear ONCE in the damage dialog.
    *
-   * Over-capacity slots do not increase survivability.
+   * freedSlots records how many usable Character inventory
+   * spaces dropping that Item will actually release.
    */
   for (
     let index = 0;
@@ -269,84 +239,106 @@ function buildDamageSnapshot(actor) {
     index++
   ) {
 
-    const slot =
-      slots[index];
+    const slot = slots[index];
 
 
-    if (
-      slot.kind === "empty"
-    ) {
+    if (slot.kind === "empty") {
 
-      emptyIndices.push(
-        index
-      );
-
+      emptyIndices.push(index);
 
       continue;
     }
 
 
     if (
-      slot.kind === "item"
+      slot.kind !== "item" ||
+      !slot.itemId ||
+      seenItemIds.has(slot.itemId)
     ) {
 
-      const item =
-        actor.items.get(
-          slot.itemId
-        );
-
-
-      if (!item) {
-        continue;
-      }
-
-
-      itemEntries.push({
-        itemId:
-          item.id,
-
-        slotIndex:
-          index,
-
-        slotNumber:
-          index + 1,
-
-        name:
-          item.name,
-
-        img:
-          item.img,
-
-        category:
-          item.system
-            ?.category ??
-          "misc",
-
-        equipped:
-          Boolean(
-            item.system
-              ?.equipped
-          )
-      });
+      continue;
     }
+
+
+    const item =
+      actor.items.get(slot.itemId);
+
+
+    if (!item) {
+      continue;
+    }
+
+
+    seenItemIds.add(item.id);
+
+
+    const freedSlots =
+      slots
+        .slice(
+          0,
+          capacity
+        )
+        .filter(candidate =>
+          (
+            candidate.kind === "item" ||
+            candidate.kind === "reserved"
+          ) &&
+          candidate.itemId === item.id
+        )
+        .length;
+
+
+    itemEntries.push({
+      itemId:
+        item.id,
+
+      slotIndex:
+        index,
+
+      slotNumber:
+        index + 1,
+
+      freedSlots:
+        Math.max(
+          1,
+          freedSlots
+        ),
+
+      name:
+        item.name,
+
+      img:
+        item.img,
+
+      category:
+        item.system?.category ??
+        "misc",
+
+      equipped:
+        Boolean(
+          item.system?.equipped
+        )
+    });
   }
 
 
-  /*
-   * Existing Wounds and Fatigue cannot be displaced.
-   *
-   * Empty slots can become Wounds.
-   * Normal Items may be dropped to become Wounds.
-   */
+  const droppableSlotCount =
+    itemEntries.reduce(
+      (total, entry) =>
+        total +
+        entry.freedSlots,
+
+      0
+    );
+
+
   const woundCapacity =
     emptyIndices.length +
-    itemEntries.length;
+    droppableSlotCount;
 
 
   /*
-   * Development/debug "Potential HP".
-   *
-   * This will likely become hidden from players later.
+   * Internal lethal-detection value.
    */
   const maxSurvivable =
     hp +
@@ -1171,42 +1163,6 @@ async function promptDamageAllocation(
               /* ------------------------------------------ */
 
               if (
-                state.allocationLethal
-              ) {
-
-                const extraResources =
-                  state.wounds -
-                  snapshot.woundCapacity;
-
-
-                showStatus(
-                  "damage-status-lethal",
-
-                  `
-                    <strong class="damage-lethal-title">
-                      LETHAL ALLOCATION
-                    </strong>
-
-                    <span>
-                      ${state.wounds} Wounds are required,
-                      but only ${snapshot.woundCapacity}
-                      slots can become Wounds.
-                      Spend at least ${extraResources}
-                      more HP or Luck.
-                    </span>
-                  `
-                );
-
-
-                return;
-              }
-
-
-              /* ------------------------------------------ */
-              /* ITEMS MUST BE DROPPED                      */
-              /* ------------------------------------------ */
-
-              if (
                 state.requiredDrops > 0
               ) {
 
@@ -1219,13 +1175,14 @@ async function promptDamageAllocation(
                     </strong>
 
                     <span>
-                      ${state.requiredDrops}
+                      Free at least ${state.requiredDrops}
+                      inventory
                       ${
                         state.requiredDrops === 1
-                          ? "Item"
-                          : "Items"
+                          ? "slot"
+                          : "slots"
                       }
-                      must be dropped to make room for
+                      by dropping Items to make room for
                       ${state.wounds}
                       ${
                         state.wounds === 1
@@ -1395,71 +1352,77 @@ async function promptDamageDrops(
   allocation
 ) {
 
+  /*
+   * In B6, requiredDrops means INVENTORY SLOTS that must
+   * be freed. Keeping the existing property name minimizes
+   * release-night changes.
+   */
   const required =
     allocation.requiredDrops;
 
 
-  if (
-    required <= 0
-  ) {
+  if (required <= 0) {
 
     return {
-      action:
-        "apply",
-
-      itemIds:
-        []
+      action: "apply",
+      itemIds: []
     };
   }
 
 
   const itemRows =
     snapshot.itemEntries
-      .map(
-        entry => {
+      .map(entry => {
 
-          const equippedLabel =
-            entry.equipped
-              ? `
-                  <span class="damage-drop-equipped">
-                    Equipped
-                  </span>
-                `
-              : "";
+        const equippedLabel =
+          entry.equipped
+            ? `
+                <span class="damage-drop-equipped">
+                  Equipped
+                </span>
+              `
+            : "";
 
 
-          return `
-            <label class="damage-drop-item">
+        const freedLabel =
+          entry.freedSlots === 1
+            ? "1 slot"
+            : `${entry.freedSlots} slots`;
 
-              <input
-                type="checkbox"
-                name="dropItem"
-                value="${escapeHTML(entry.itemId)}"
-              />
 
-              <img
-                src="${escapeHTML(entry.img)}"
-                alt=""
-              />
+        return `
+          <label class="damage-drop-item">
 
-              <span class="damage-drop-item-info">
+            <input
+              type="checkbox"
+              name="dropItem"
+              value="${escapeHTML(entry.itemId)}"
+              data-freed-slots="${entry.freedSlots}"
+            />
 
-                <strong>
-                  ${escapeHTML(entry.name)}
-                </strong>
+            <img
+              src="${escapeHTML(entry.img)}"
+              alt=""
+            />
 
-                <small>
-                  Inventory Slot ${entry.slotNumber}
-                </small>
+            <span class="damage-drop-item-info">
 
-              </span>
+              <strong>
+                ${escapeHTML(entry.name)}
+              </strong>
 
-              ${equippedLabel}
+              <small>
+                Inventory Slot ${entry.slotNumber}
+                · Frees ${freedLabel}
+              </small>
 
-            </label>
-          `;
-        }
-      )
+            </span>
+
+            ${equippedLabel}
+
+          </label>
+        `;
+      })
       .join("");
 
 
@@ -1486,20 +1449,18 @@ async function promptDamageDrops(
               ? "slot is"
               : "slots are"
           }
-          available.
+          currently available.
         </span>
 
         <span>
-          Choose exactly
-          <strong>
-            ${required}
-          </strong>
+          Drop one or more Items that free at least
+          <strong>${required}</strong>
+          inventory
           ${
             required === 1
-              ? "Item"
-              : "Items"
-          }
-          to drop.
+              ? "slot"
+              : "slots"
+          }.
         </span>
 
       </div>
@@ -1516,13 +1477,13 @@ async function promptDamageDrops(
         class="damage-drop-count"
         data-damage-drop-count
       >
-        0 / ${required} selected
+        0 / ${required} slots freed
       </div>
 
 
       <div class="damage-drop-note">
         Dropped Items remain attached to the Character for now,
-        but lose their inventory slot and appear under
+        but lose their inventory slots and appear under
         Dropped / Unassigned Items.
       </div>
 
@@ -1573,13 +1534,10 @@ async function promptDamageDrops(
             "fa-solid fa-arrow-left",
 
           callback:
-            async () => {
-
-              return {
-                action:
-                  "back"
-              };
-            }
+            async () => ({
+              action:
+                "back"
+            })
         },
 
 
@@ -1602,6 +1560,7 @@ async function promptDamageDrops(
           disabled:
             true,
 
+
           callback:
             async (
               event,
@@ -1617,20 +1576,35 @@ async function promptDamageDrops(
               }
 
 
-              const selected =
+              const selectedInputs =
                 Array.from(
                   form.querySelectorAll(
                     'input[name="dropItem"]:checked'
                   )
-                )
-                  .map(
-                    input =>
-                      input.value
-                  );
+                );
+
+
+              const freedSlots =
+                selectedInputs.reduce(
+                  (total, input) =>
+                    total +
+                    Math.max(
+                      1,
+
+                      integerOr(
+                        input.dataset
+                          .freedSlots,
+
+                        1
+                      )
+                    ),
+
+                  0
+                );
 
 
               if (
-                selected.length !==
+                freedSlots <
                 required
               ) {
 
@@ -1643,19 +1617,16 @@ async function promptDamageDrops(
                   "apply",
 
                 itemIds:
-                  selected
+                  selectedInputs.map(
+                    input =>
+                      input.value
+                  )
               };
             }
         }
       ],
 
 
-      /*
-       * Same corrected Foundry v13 render signature.
-       *
-       * This also fixes the Item-drop selector before
-       * we even get there in testing.
-       */
       render:
         (event, dialog) => {
 
@@ -1698,16 +1669,35 @@ async function promptDamageDrops(
                 );
 
 
+              const freedSlots =
+                selected.reduce(
+                  (total, checkbox) =>
+                    total +
+                    Math.max(
+                      1,
+
+                      integerOr(
+                        checkbox.dataset
+                          .freedSlots,
+
+                        1
+                      )
+                    ),
+
+                  0
+                );
+
+
               if (count) {
 
                 count.textContent =
-                  `${selected.length} / ${required} selected`;
+                  `${freedSlots} / ${required} slots freed`;
 
 
                 count.classList.toggle(
                   "damage-drop-count-ready",
 
-                  selected.length ===
+                  freedSlots >=
                     required
                 );
 
@@ -1715,7 +1705,7 @@ async function promptDamageDrops(
                 count.classList.toggle(
                   "damage-drop-count-over",
 
-                  selected.length >
+                  freedSlots >
                     required
                 );
               }
@@ -1724,7 +1714,7 @@ async function promptDamageDrops(
               if (applyButton) {
 
                 applyButton.disabled =
-                  selected.length !==
+                  freedSlots <
                   required;
               }
             };
@@ -1769,12 +1759,6 @@ async function commitDamage(
     sheet.actor;
 
 
-  /*
-   * Rebuild Character state at the exact moment of
-   * commitment.
-   *
-   * Nothing from the dialogs is trusted blindly.
-   */
   const snapshot =
     buildDamageSnapshot(
       actor
@@ -1794,35 +1778,23 @@ async function commitDamage(
       `${actor.name}'s state changed while damage was being allocated. Damage was not applied.`
     );
 
-
     return false;
   }
 
 
-  const requiredDrops =
+  /*
+   * B6 interpretation:
+   * requiredDrops = inventory spaces that must be freed.
+   */
+  const requiredSlots =
     state.requiredDrops;
 
 
-  const uniqueDropIds =
-    [
-      ...new Set(
-        dropItemIds ?? []
-      )
-    ];
-
-
-  if (
-    uniqueDropIds.length !==
-    requiredDrops
-  ) {
-
-    ui.notifications.warn(
-      "The required number of dropped Items changed. Damage was not applied."
-    );
-
-
-    return false;
-  }
+  const uniqueDropIds = [
+    ...new Set(
+      dropItemIds ?? []
+    )
+  ];
 
 
   const dropSet =
@@ -1840,15 +1812,41 @@ async function commitDamage(
     );
 
 
+  /*
+   * Every supplied Item must still exist in a valid
+   * Character inventory anchor.
+   */
   if (
     selectedEntries.length !==
-    requiredDrops
+    uniqueDropIds.length
   ) {
 
     ui.notifications.warn(
       "One or more selected Items are no longer in a valid inventory slot. Damage was not applied."
     );
 
+    return false;
+  }
+
+
+  const freedSlots =
+    selectedEntries.reduce(
+      (total, entry) =>
+        total +
+        entry.freedSlots,
+
+      0
+    );
+
+
+  if (
+    freedSlots <
+    requiredSlots
+  ) {
+
+    ui.notifications.warn(
+      "The selected Items no longer free enough inventory space. Damage was not applied."
+    );
 
     return false;
   }
@@ -1866,15 +1864,33 @@ async function commitDamage(
   /* DROP SELECTED ITEMS                                      */
   /* -------------------------------------------------------- */
 
+  /*
+   * One selected embedded Item clears BOTH its anchor and
+   * every reserved slot belonging to it.
+   */
   for (
-    const entry of
-      selectedEntries
+    let index = 0;
+    index < slots.length;
+    index++
   ) {
 
-    slots[
-      entry.slotIndex
-    ] =
-      emptyInventorySlot();
+    const slot =
+      slots[index];
+
+
+    if (
+      (
+        slot.kind === "item" ||
+        slot.kind === "reserved"
+      ) &&
+      dropSet.has(
+        slot.itemId
+      )
+    ) {
+
+      slots[index] =
+        emptyInventorySlot();
+    }
   }
 
 
@@ -1882,14 +1898,12 @@ async function commitDamage(
   /* FIND WOUND TARGETS                                       */
   /* -------------------------------------------------------- */
 
-  const woundTargets =
-    [];
+  const woundTargets = [];
 
 
   for (
     let index = 0;
-    index <
-      snapshot.capacity;
+    index < snapshot.capacity;
     index++
   ) {
 
@@ -1914,7 +1928,6 @@ async function commitDamage(
       "There is no longer enough inventory space for the required Wounds. Damage was not applied."
     );
 
-
     return false;
   }
 
@@ -1929,13 +1942,9 @@ async function commitDamage(
     wound++
   ) {
 
-    const index =
-      woundTargets[
-        wound
-      ];
-
-
-    slots[index] =
+    slots[
+      woundTargets[wound]
+    ] =
       woundInventorySlot();
   }
 
@@ -1950,11 +1959,6 @@ async function commitDamage(
     state.luckSpent;
 
 
-  /*
-   * THIS is the gameplay commit.
-   *
-   * Before this line, neither dialog has changed Bob.
-   */
   try {
 
     await actor.update(
@@ -2010,8 +2014,7 @@ async function commitDamage(
         item =>
           item &&
           Boolean(
-            item.system
-              ?.equipped
+            item.system?.equipped
           )
       )
       .map(
@@ -2060,10 +2063,6 @@ async function commitDamage(
   }
 
 
-  /* -------------------------------------------------------- */
-  /* DEBUG OUTPUT                                             */
-  /* -------------------------------------------------------- */
-
   console.debug(
     "Delver | Take Damage committed:",
     {
@@ -2082,6 +2081,8 @@ async function commitDamage(
       wounds:
         state.wounds,
 
+      freedSlots,
+
       droppedItems:
         selectedEntries.map(
           entry => ({
@@ -2093,6 +2094,9 @@ async function commitDamage(
 
             oldSlot:
               entry.slotNumber,
+
+            freedSlots:
+              entry.freedSlots,
 
             wasEquipped:
               entry.equipped
@@ -2114,14 +2118,12 @@ async function commitDamage(
 
 
   const dropText =
-    selectedEntries.length >
-    0
+    selectedEntries.length > 0
       ? ` · ${selectedEntries.length} ${
           selectedEntries.length === 1
             ? "Item dropped"
             : "Items dropped"
         }`
-
       : "";
 
 
