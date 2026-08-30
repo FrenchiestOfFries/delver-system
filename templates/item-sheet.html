@@ -1,5 +1,5 @@
 <form
-  class="delver-item-sheet"
+  class="delver-item-sheet delver-item-v3-sheet {{#if systemData.magical}}is-magical{{/if}}"
   autocomplete="off"
 >
 
@@ -7,28 +7,80 @@
   <!-- HEADER                                                 -->
   <!-- ====================================================== -->
 
-  <header class="delver-item-header">
+  <header class="delver-item-header-v3">
 
-    <img
-      class="delver-item-image"
-      src="{{item.img}}"
-      data-edit="img"
-      title="{{item.name}}"
-    />
+    <div class="delver-item-portrait-wrap">
+
+      <img
+        class="delver-item-image-v3"
+        src="{{item.img}}"
+        data-edit="img"
+        title="{{item.name}}"
+      />
+
+      {{#if systemData.magical}}
+
+        <span
+          class="delver-item-magical-mark"
+          title="Magical Item"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
+
+      {{/if}}
+
+    </div>
 
 
-    <div class="delver-item-name">
+    <div class="delver-item-title-block">
 
       <label>
-        Name
+        Item Name
       </label>
 
       <input
+        class="delver-item-name-input"
         type="text"
         name="name"
         value="{{item.name}}"
         placeholder="Item Name"
       />
+
+
+      <div class="delver-item-summary-line">
+
+        <span class="delver-item-type-chip">
+          {{derived.categoryLabel}}
+        </span>
+
+
+        {{#if isBulky}}
+
+          <span class="delver-item-summary-chip bulky">
+            Bulky · {{derived.slotCost}} Slots
+          </span>
+
+        {{/if}}
+
+
+        {{#if systemData.traits.keyItem}}
+
+          <span class="delver-item-summary-chip">
+            Key Item
+          </span>
+
+        {{/if}}
+
+
+        {{#if systemData.magical}}
+
+          <span class="delver-item-summary-chip magical">
+            Magical
+          </span>
+
+        {{/if}}
+
+      </div>
 
     </div>
 
@@ -36,208 +88,264 @@
 
 
   <!-- ====================================================== -->
-  <!-- BASIC ITEM DATA                                        -->
+  <!-- CORE                                                   -->
   <!-- ====================================================== -->
 
-  <section class="delver-item-section">
+  <section class="delver-item-panel">
 
-    <h2>
-      Item
-    </h2>
+    <div class="delver-item-panel-heading">
 
+      <h2>
+        Core
+      </h2>
 
-    <!-- TYPE -->
-
-    <div class="form-group">
-
-      <label>
-        Type
-      </label>
-
-      <select
-        name="system.category"
-      >
-
-        <option
-          value="misc"
-          {{#if (eq systemData.category "misc")}}
-            selected
-          {{/if}}
-        >
-          Misc
-        </option>
-
-        <option
-          value="weapon"
-          {{#if (eq systemData.category "weapon")}}
-            selected
-          {{/if}}
-        >
-          Weapon
-        </option>
-
-        <option
-          value="armor"
-          {{#if (eq systemData.category "armor")}}
-            selected
-          {{/if}}
-        >
-          Armor
-        </option>
-
-        <option
-          value="spell-vessel"
-          {{#if (eq systemData.category "spell-vessel")}}
-            selected
-          {{/if}}
-        >
-          Spell Vessel
-        </option>
-
-      </select>
+      <span>
+        What this Item fundamentally is
+      </span>
 
     </div>
 
 
-    <!-- CARRY MODE -->
+    <div class="delver-item-grid three">
 
-    <div class="form-group">
-
-      <label>
-        Carry
-      </label>
-
-      <select
-        name="system.carryMode"
-      >
-
-        <option
-          value="slot"
-          {{#if (eq systemData.carryMode "slot")}}
-            selected
-          {{/if}}
-        >
-          Inventory Slot
-        </option>
-
-        <option
-          value="loose"
-          {{#if (eq systemData.carryMode "loose")}}
-            selected
-          {{/if}}
-        >
-          Carried Loosely
-        </option>
-
-        <option
-          value="backpack"
-          {{#if (eq systemData.carryMode "backpack")}}
-            selected
-          {{/if}}
-        >
-          Backpack
-        </option>
-
-        <option
-          value="bulky"
-          {{#if (eq systemData.carryMode "bulky")}}
-            selected
-          {{/if}}
-        >
-          Bulky / In Hands
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <p class="hint">
-      Bulky / In Hands is for cumbersome objects that prevent normal
-      operation, such as a chest or strongbox. Heavy weapons still use
-      one normal Inventory Slot.
-    </p>
-
-
-    <!-- EQUIPPABLE -->
-
-    {{#if isInherentlyEquippable}}
-
-      <div class="form-group">
+      <div class="delver-item-field">
 
         <label>
-          Equippable
+          Type
         </label>
 
-        <span class="hint">
-          Yes — {{#if isWeapon}}Weapon{{else}}Armor{{/if}}
+        <select name="system.category">
+
+          <option
+            value="armor"
+            {{#if (eq systemData.category "armor")}}selected{{/if}}
+          >
+            Armor
+          </option>
+
+          <option
+            value="weapon"
+            {{#if (eq systemData.category "weapon")}}selected{{/if}}
+          >
+            Weapon
+          </option>
+
+          <option
+            value="trinket"
+            {{#if (eq systemData.category "trinket")}}selected{{/if}}
+          >
+            Trinket
+          </option>
+
+          <option
+            value="consumable"
+            {{#if (eq systemData.category "consumable")}}selected{{/if}}
+          >
+            Consumable
+          </option>
+
+          <option
+            value="gear"
+            {{#if (eq systemData.category "gear")}}selected{{/if}}
+          >
+            Gear
+          </option>
+
+          <option
+            value="spell-vessel"
+            {{#if (eq systemData.category "spell-vessel")}}selected{{/if}}
+          >
+            Spell Vessel
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="delver-item-field">
+
+        <label>
+          Quality
+        </label>
+
+        <select name="system.quality">
+
+          <option
+            value="0"
+            {{#if (eq systemData.quality 0)}}selected{{/if}}
+          >
+            +0
+          </option>
+
+          <option
+            value="1"
+            {{#if (eq systemData.quality 1)}}selected{{/if}}
+          >
+            +1
+          </option>
+
+          <option
+            value="2"
+            {{#if (eq systemData.quality 2)}}selected{{/if}}
+          >
+            +2
+          </option>
+
+          <option
+            value="3"
+            {{#if (eq systemData.quality 3)}}selected{{/if}}
+          >
+            +3
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="delver-item-field">
+
+        <label>
+          Decay
+        </label>
+
+
+        {{#if isConsumable}}
+
+          <div class="delver-item-static-value muted">
+            —
+          </div>
+
+          <small>
+            Consumables break or disappear instead of tracking Decay.
+          </small>
+
+        {{else}}
+
+          <select name="system.decay">
+
+            <option
+              value="0"
+              {{#if (eq systemData.decay 0)}}selected{{/if}}
+            >
+              0
+            </option>
+
+            <option
+              value="1"
+              {{#if (eq systemData.decay 1)}}selected{{/if}}
+            >
+              1
+            </option>
+
+            <option
+              value="2"
+              {{#if (eq systemData.decay 2)}}selected{{/if}}
+            >
+              2
+            </option>
+
+            <option
+              value="3"
+              {{#if (eq systemData.decay 3)}}selected{{/if}}
+            >
+              3
+            </option>
+
+          </select>
+
+        {{/if}}
+
+      </div>
+
+    </div>
+
+
+    <div class="delver-item-derived-strip">
+
+      <div>
+
+        <span>
+          Roll Modifier
         </span>
 
-      </div>
-
-    {{else}}
-
-      <div class="form-group">
-
-        <label>
-          Equippable
-        </label>
-
-        <input
-          type="checkbox"
-          name="system.equippable"
-          {{checked systemData.equippable}}
-        />
+        <strong>
+          {{derived.rollModifierText}}
+        </strong>
 
       </div>
 
-    {{/if}}
 
+      {{#if isWeapon}}
 
-    <!-- EQUIPPED STATE -->
+        <div>
 
-    {{#if isOwnedByCharacter}}
+          <span>
+            Base Die
+          </span>
 
-
-      {{#if canEquipHere}}
-
-        <div class="form-group">
-
-          <label>
-            Equipped
-          </label>
-
-          <input
-            type="checkbox"
-            name="system.equipped"
-            {{checked systemData.equipped}}
-          />
+          <strong>
+            {{#if derived.weaponBaseDie}}
+              {{derived.weaponBaseDie}}
+            {{else}}
+              —
+            {{/if}}
+          </strong>
 
         </div>
 
 
-      {{else}}
+        <div>
 
+          <span>
+            Current Die
+          </span>
 
-        {{#if isEquippable}}
+          <strong>
+            {{#if derived.weaponCurrentDie}}
+              {{derived.weaponCurrentDie}}
+            {{else}}
+              —
+            {{/if}}
+          </strong>
 
-          <div class="form-group">
-
-            <label>
-              Equipped
-            </label>
-
-            <span class="hint">
-              Move this Item into a numbered Inventory Slot before equipping it.
-            </span>
-
-          </div>
-
-        {{/if}}
-
+        </div>
 
       {{/if}}
 
+
+      <div>
+
+        <span>
+          Slot Cost
+        </span>
+
+        <strong>
+          {{derived.slotCost}}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    {{#if isWeapon}}
+
+      <p class="delver-item-rule-note">
+        Weapon Quality modifies rolls. Weapon Decay reduces the current
+        damage die, with d4 as the floor; excess Decay remains until repaired.
+      </p>
+
+    {{else}}
+
+      {{#unless isConsumable}}
+
+        <p class="delver-item-rule-note">
+          Rolls involving this Item use Quality minus Decay.
+        </p>
+
+      {{/unless}}
 
     {{/if}}
 
@@ -245,21 +353,712 @@
 
 
   <!-- ====================================================== -->
+  <!-- TRAITS                                                 -->
+  <!-- ====================================================== -->
+
+  <section class="delver-item-panel">
+
+    <div class="delver-item-panel-heading">
+
+      <h2>
+        Traits
+      </h2>
+
+      <span>
+        Special rules layered onto the Item type
+      </span>
+
+    </div>
+
+
+    <div class="delver-item-toggle-grid">
+
+      <label class="delver-item-toggle-card">
+
+        <input
+          type="checkbox"
+          name="system.magical"
+          {{checked systemData.magical}}
+        />
+
+        <span>
+
+          <strong>
+            Magical
+          </strong>
+
+          <small>
+            Marks the Item for future magical inventory and scene effects.
+          </small>
+
+        </span>
+
+      </label>
+
+
+      <label class="delver-item-toggle-card">
+
+        <input
+          type="checkbox"
+          name="system.traits.keyItem"
+          {{checked systemData.traits.keyItem}}
+        />
+
+        <span>
+
+          <strong>
+            Key Item
+          </strong>
+
+          <small>
+            Important Trinkets use Inventory / Backpack instead of Loose carry.
+          </small>
+
+        </span>
+
+      </label>
+
+
+      {{#if showExplicitEquippable}}
+
+        <label class="delver-item-toggle-card">
+
+          <input
+            type="checkbox"
+            name="system.traits.equippable"
+            {{checked systemData.traits.equippable}}
+          />
+
+          <span>
+
+            <strong>
+              Mechanically Equippable
+            </strong>
+
+            <small>
+              Allows unusual Gear, Trinkets, or Vessels to participate in
+              equipment rules.
+            </small>
+
+          </span>
+
+        </label>
+
+      {{else}}
+
+        <div class="delver-item-toggle-card locked">
+
+          <i class="fa-solid fa-lock"></i>
+
+          <span>
+
+            <strong>
+              Equippable
+            </strong>
+
+            <small>
+              {{equippableReason}}
+            </small>
+
+          </span>
+
+        </div>
+
+      {{/if}}
+
+
+      <label class="delver-item-toggle-card bulky">
+
+        <input
+          type="checkbox"
+          data-delver-bulky-toggle
+          {{checked isBulky}}
+        />
+
+        <span>
+
+          <strong>
+            Bulky / Oversized
+          </strong>
+
+          <small>
+            Consumes 2+ real inventory slots and causes Encumbrance while carried.
+          </small>
+
+        </span>
+
+      </label>
+
+    </div>
+
+
+    {{#if isBulky}}
+
+      <div class="delver-item-bulky-config">
+
+        <div class="delver-item-field">
+
+          <label>
+            Inventory Slots Required
+          </label>
+
+          <input
+            type="number"
+            name="system.traits.bulkySlots"
+            value="{{systemData.traits.bulkySlots}}"
+            min="2"
+            max="20"
+            step="1"
+          />
+
+        </div>
+
+
+        <p>
+          Bulky Items will occupy this many numbered slots. While carried
+          they are required to be equipped and the Character is Encumbered
+          (-1 AP).
+        </p>
+
+      </div>
+
+    {{/if}}
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- CARRY RULES                                            -->
+  <!-- ====================================================== -->
+
+  <section class="delver-item-panel">
+
+    <div class="delver-item-panel-heading">
+
+      <h2>
+        Carry Rules
+      </h2>
+
+      <span>
+        Derived from Type + Traits
+      </span>
+
+    </div>
+
+
+    <div class="delver-item-carry-rule-row">
+
+      <span class="delver-item-carry-rule-label">
+        Allowed
+      </span>
+
+      <div class="delver-item-carry-chips">
+
+        {{#each derived.allowedCarryLabels as |label|}}
+
+          <span>
+            {{label}}
+          </span>
+
+        {{/each}}
+
+      </div>
+
+    </div>
+
+
+    {{#if isOwnedByCharacter}}
+
+      <div class="delver-item-runtime-grid">
+
+        <div class="delver-item-field">
+
+          <label>
+            Current Carry Location
+          </label>
+
+          <select name="system.carryMode">
+
+            <option
+              value="slot"
+              {{#if (eq systemData.carryMode "slot")}}selected{{/if}}
+            >
+              Inventory Slot
+            </option>
+
+            <option
+              value="loose"
+              {{#if (eq systemData.carryMode "loose")}}selected{{/if}}
+            >
+              Carried Loosely
+            </option>
+
+            <option
+              value="backpack"
+              {{#if (eq systemData.carryMode "backpack")}}selected{{/if}}
+            >
+              Backpack
+            </option>
+
+
+            {{#if (eq systemData.carryMode "bulky")}}
+
+              <option
+                value="bulky"
+                selected
+              >
+                Legacy Bulky / In Hands
+              </option>
+
+            {{/if}}
+
+          </select>
+
+        </div>
+
+
+        <div class="delver-item-field">
+
+          <label>
+            Equipped
+          </label>
+
+
+          {{#if canEquipHere}}
+
+            <label class="delver-item-inline-check">
+
+              <input
+                type="checkbox"
+                name="system.equipped"
+                {{checked systemData.equipped}}
+              />
+
+              <span>
+                Equipped
+              </span>
+
+            </label>
+
+          {{else}}
+
+
+            {{#if isEquippable}}
+
+              <div class="delver-item-static-value muted">
+                Not currently equip-ready
+              </div>
+
+              <small>
+                Normal equipment must occupy a numbered Inventory Slot.
+                Bulky equipment receives its new multi-slot behavior in
+                the next pass.
+              </small>
+
+            {{else}}
+
+              <div class="delver-item-static-value muted">
+                Not mechanically equippable
+              </div>
+
+            {{/if}}
+
+          {{/if}}
+
+        </div>
+
+      </div>
+
+
+      {{#unless derived.currentCarryAllowed}}
+
+        <div class="delver-item-warning">
+
+          <i class="fa-solid fa-triangle-exclamation"></i>
+
+          <span>
+            This owned Item is currently in a location that Item v3 would
+            not allow. It has been left intact for the v0.1.5 multi-slot /
+            carry migration pass.
+          </span>
+
+        </div>
+
+      {{/unless}}
+
+    {{else}}
+
+      <p class="delver-item-rule-note">
+        World Items are definitions. Their actual carry location and
+        Equipped state belong to the Actor-owned copy created when the
+        Item is picked up.
+      </p>
+
+    {{/if}}
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- WEAPON                                                 -->
+  <!-- ====================================================== -->
+
+  {{#if isWeapon}}
+
+    <section class="delver-item-panel type-panel weapon">
+
+      <div class="delver-item-panel-heading">
+
+        <h2>
+          Weapon
+        </h2>
+
+        <span>
+          Weapon-specific rules
+        </span>
+
+      </div>
+
+
+      <div class="delver-item-grid two">
+
+        <div class="delver-item-field">
+
+          <label>
+            Weapon Class
+          </label>
+
+          <select name="system.weapon.class">
+
+            <option
+              value=""
+              {{#if (eq systemData.weapon.class "")}}selected{{/if}}
+            >
+              —
+            </option>
+
+            <option
+              value="light"
+              {{#if (eq systemData.weapon.class "light")}}selected{{/if}}
+            >
+              Light
+            </option>
+
+            <option
+              value="balanced"
+              {{#if (eq systemData.weapon.class "balanced")}}selected{{/if}}
+            >
+              Balanced
+            </option>
+
+            <option
+              value="heavy"
+              {{#if (eq systemData.weapon.class "heavy")}}selected{{/if}}
+            >
+              Heavy
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="delver-item-field">
+
+          <label>
+            Base Damage Die
+          </label>
+
+          <select name="system.weapon.baseDie">
+
+            <option
+              value=""
+              {{#if (eq systemData.weapon.baseDie "")}}selected{{/if}}
+            >
+              —
+            </option>
+
+            <option
+              value="d4"
+              {{#if (eq systemData.weapon.baseDie "d4")}}selected{{/if}}
+            >
+              d4
+            </option>
+
+            <option
+              value="d6"
+              {{#if (eq systemData.weapon.baseDie "d6")}}selected{{/if}}
+            >
+              d6
+            </option>
+
+            <option
+              value="d8"
+              {{#if (eq systemData.weapon.baseDie "d8")}}selected{{/if}}
+            >
+              d8
+            </option>
+
+            <option
+              value="d10"
+              {{#if (eq systemData.weapon.baseDie "d10")}}selected{{/if}}
+            >
+              d10
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="delver-item-current-die-card">
+
+        <span>
+          Current Damage Die
+        </span>
+
+        <strong>
+
+          {{#if derived.weaponCurrentDie}}
+
+            {{derived.weaponCurrentDie}}
+
+          {{else}}
+
+            —
+
+          {{/if}}
+
+        </strong>
+
+        <small>
+          Derived from Base Die and Decay. Base Die is never overwritten
+          by damage.
+        </small>
+
+      </div>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- ARMOR                                                  -->
+  <!-- ====================================================== -->
+
+  {{#if isArmor}}
+
+    <section class="delver-item-panel type-panel armor">
+
+      <div class="delver-item-panel-heading">
+
+        <h2>
+          Armor
+        </h2>
+
+        <span>
+          Armor-specific rules
+        </span>
+
+      </div>
+
+
+      <div class="delver-item-field narrow">
+
+        <label>
+          Defense Bonus
+        </label>
+
+        <input
+          type="number"
+          name="system.armor.defense"
+          value="{{systemData.armor.defense}}"
+          step="1"
+        />
+
+      </div>
+
+
+      <p class="delver-item-rule-note">
+        Standard armor normally provides +1 Defense. This remains editable
+        for magical, damaged, or unusual equipment.
+      </p>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- CONSUMABLE                                             -->
+  <!-- ====================================================== -->
+
+  {{#if isConsumable}}
+
+    <section class="delver-item-panel type-panel consumable">
+
+      <div class="delver-item-panel-heading">
+
+        <h2>
+          Consumable
+        </h2>
+
+        <span>
+          Actionable, expendable Items
+        </span>
+
+      </div>
+
+
+      <div class="delver-item-field">
+
+        <label>
+          Delver Action
+        </label>
+
+        <select name="system.consumable.action">
+
+          <option
+            value=""
+            {{#if (eq systemData.consumable.action "")}}selected{{/if}}
+          >
+            None / Not Automated Yet
+          </option>
+
+          <option
+            value="consume"
+            {{#if (eq systemData.consumable.action "consume")}}selected{{/if}}
+          >
+            Consume
+          </option>
+
+          <option
+            value="rest"
+            {{#if (eq systemData.consumable.action "rest")}}selected{{/if}}
+          >
+            Rest / Ration
+          </option>
+
+          <option
+            value="light"
+            {{#if (eq systemData.consumable.action "light")}}selected{{/if}}
+          >
+            Light / Burn
+          </option>
+
+          <option
+            value="tool-check"
+            {{#if (eq systemData.consumable.action "tool-check")}}selected{{/if}}
+          >
+            Tool Check
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <p class="delver-item-rule-note">
+        These action names are authoring metadata only in v0.1.5A.
+        Context-menu execution will be connected as each gameplay action
+        is implemented.
+      </p>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
+  <!-- SPELL VESSEL                                           -->
+  <!-- ====================================================== -->
+
+  {{#if isSpellVessel}}
+
+    <section class="delver-item-panel type-panel spell-vessel">
+
+      <div class="delver-item-panel-heading">
+
+        <h2>
+          Spell Vessel
+        </h2>
+
+        <span>
+          Container for a linked Delver Spell
+        </span>
+
+      </div>
+
+
+      <div class="delver-item-field">
+
+        <label>
+          Linked Spell UUID
+        </label>
+
+        <input
+          type="text"
+          name="system.spellVessel.spellUuid"
+          value="{{systemData.spellVessel.spellUuid}}"
+          placeholder="Future Delver Spell UUID"
+        />
+
+      </div>
+
+
+      {{#if isOwnedByActor}}
+
+        <label class="delver-item-inline-check">
+
+          <input
+            type="checkbox"
+            name="system.spellVessel.inert"
+            {{checked systemData.spellVessel.inert}}
+          />
+
+          <span>
+            Vessel is Inert
+          </span>
+
+        </label>
+
+      {{/if}}
+
+
+      <p class="delver-item-rule-note">
+        Spell documents are not implemented yet. The Vessel stores the
+        future relationship and runtime Inert state without duplicating
+        spell rules.
+      </p>
+
+    </section>
+
+  {{/if}}
+
+
+  <!-- ====================================================== -->
   <!-- CHARGES                                                -->
   <!-- ====================================================== -->
 
-  <section class="delver-item-section">
+  <section class="delver-item-panel compact">
 
-    <h2>
-      Charges
-    </h2>
+    <div class="delver-item-panel-heading">
+
+      <h2>
+        Charges / Uses
+      </h2>
+
+      <span>
+        Optional generic counter
+      </span>
+
+    </div>
 
 
-    <div class="form-group">
-
-      <label>
-        Uses Charges
-      </label>
+    <label class="delver-item-inline-check">
 
       <input
         type="checkbox"
@@ -267,14 +1066,18 @@
         {{checked systemData.charges.enabled}}
       />
 
-    </div>
+      <span>
+        Track Charges
+      </span>
+
+    </label>
 
 
     {{#if hasCharges}}
 
-      <div class="delver-item-inline">
+      <div class="delver-item-grid two charges">
 
-        <div class="form-group">
+        <div class="delver-item-field">
 
           <label>
             Current
@@ -290,10 +1093,10 @@
         </div>
 
 
-        <div class="form-group">
+        <div class="delver-item-field">
 
           <label>
-            Max
+            Maximum
           </label>
 
           <input
@@ -313,203 +1116,18 @@
 
 
   <!-- ====================================================== -->
-  <!-- WEAPON                                                 -->
-  <!-- ====================================================== -->
-
-  {{#if isWeapon}}
-
-    <section class="delver-item-section">
-
-      <h2>
-        Weapon
-      </h2>
-
-
-      <div class="form-group">
-
-        <label>
-          Weapon Class
-        </label>
-
-        <select
-          name="system.weapon.class"
-        >
-
-          <option
-            value=""
-            {{#if (eq systemData.weapon.class "")}}
-              selected
-            {{/if}}
-          >
-            —
-          </option>
-
-          <option
-            value="light"
-            {{#if (eq systemData.weapon.class "light")}}
-              selected
-            {{/if}}
-          >
-            Light
-          </option>
-
-          <option
-            value="balanced"
-            {{#if (eq systemData.weapon.class "balanced")}}
-              selected
-            {{/if}}
-          >
-            Balanced
-          </option>
-
-          <option
-            value="heavy"
-            {{#if (eq systemData.weapon.class "heavy")}}
-              selected
-            {{/if}}
-          >
-            Heavy
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          Damage Die
-        </label>
-
-        <select
-          name="system.weapon.die"
-        >
-
-          <option
-            value=""
-            {{#if (eq systemData.weapon.die "")}}
-              selected
-            {{/if}}
-          >
-            —
-          </option>
-
-          <option
-            value="d4"
-            {{#if (eq systemData.weapon.die "d4")}}
-              selected
-            {{/if}}
-          >
-            d4
-          </option>
-
-          <option
-            value="d6"
-            {{#if (eq systemData.weapon.die "d6")}}
-              selected
-            {{/if}}
-          >
-            d6
-          </option>
-
-          <option
-            value="d8"
-            {{#if (eq systemData.weapon.die "d8")}}
-              selected
-            {{/if}}
-          >
-            d8
-          </option>
-
-          <option
-            value="d10"
-            {{#if (eq systemData.weapon.die "d10")}}
-              selected
-            {{/if}}
-          >
-            d10
-          </option>
-
-        </select>
-
-      </div>
-
-    </section>
-
-  {{/if}}
-
-
-  <!-- ====================================================== -->
-  <!-- ARMOR                                                  -->
-  <!-- ====================================================== -->
-
-  {{#if isArmor}}
-
-    <section class="delver-item-section">
-
-      <h2>
-        Armor
-      </h2>
-
-
-      <div class="form-group">
-
-        <label>
-          Defense Bonus
-        </label>
-
-        <input
-          type="number"
-          name="system.armor.defense"
-          value="{{systemData.armor.defense}}"
-          step="1"
-        />
-
-      </div>
-
-
-      <p class="hint">
-        Standard armor normally provides +1 Defense.
-        This field stays editable for magical or unusual equipment.
-      </p>
-
-    </section>
-
-  {{/if}}
-
-
-  <!-- ====================================================== -->
-  <!-- SPELL VESSEL                                           -->
-  <!-- ====================================================== -->
-
-  {{#if isSpellVessel}}
-
-    <section class="delver-item-section">
-
-      <h2>
-        Spell Vessel
-      </h2>
-
-      <p class="hint">
-        Spell-specific mechanics are intentionally freeform for now.
-        Use the description below for spell rules and effects.
-      </p>
-
-    </section>
-
-  {{/if}}
-
-
-  <!-- ====================================================== -->
   <!-- DESCRIPTION                                            -->
   <!-- ====================================================== -->
 
-  <section class="delver-item-section delver-item-description">
+  <section class="delver-item-panel delver-item-description-v3">
 
-    <h2>
-      Description / Notes
-    </h2>
+    <div class="delver-item-panel-heading">
+
+      <h2>
+        Description / Notes
+      </h2>
+
+    </div>
 
     <textarea
       name="system.description"
@@ -523,13 +1141,13 @@
   <!-- SAVE                                                   -->
   <!-- ====================================================== -->
 
-  <footer class="delver-item-footer">
+  <footer class="delver-item-footer-v3">
 
     <button type="submit">
 
       <i class="fas fa-save"></i>
 
-      Save
+      Save Item
 
     </button>
 

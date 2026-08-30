@@ -2,6 +2,11 @@ import {
   runTakeDamage
 } from "./delver-damage.js";
 
+import {
+  getItemDerivedData,
+  isItemEquippable,
+  normalizeItemCategory
+} from "./delver-item-rules.js";
 
 const DELVER_MAX_INVENTORY_SLOTS = 20;
 const DELVER_BASE_INVENTORY_SLOTS = 10;
@@ -21,6 +26,7 @@ const ABILITY_KEYS = [
 const VALID_SLOT_KINDS = new Set([
   "empty",
   "item",
+  "reserved",
   "wound",
   "fatigue"
 ]);
@@ -37,6 +43,15 @@ function emptyInventorySlot() {
   return {
     kind: "empty",
     itemId: "",
+    label: ""
+  };
+}
+
+
+function reservedInventorySlot(itemId) {
+  return {
+    kind: "reserved",
+    itemId,
     label: ""
   };
 }
@@ -137,8 +152,12 @@ export class DelverCharacterSheet extends ActorSheet {
     /* INVENTORY SLOTS                                        */
     /* ------------------------------------------------------ */
 
+    const rawInventorySlots =
+      systemData.inventory.slots;
+
+
     const inventorySlots =
-      systemData.inventory.slots.map(
+      rawInventorySlots.map(
         (slot, index) => {
 
           const available =
@@ -156,13 +175,88 @@ export class DelverCharacterSheet extends ActorSheet {
             occupied;
 
 
+          const itemBacked =
+            (
+              slot.kind === "item" ||
+              slot.kind === "reserved"
+            ) &&
+            Boolean(
+              slot.itemId
+            );
+
+
           const embeddedItem =
-            slot.kind === "item" &&
-            slot.itemId
+            itemBacked
               ? this.actor.items.get(
                   slot.itemId
                 )
               : null;
+
+
+          const anchorIndex =
+            embeddedItem
+              ? rawInventorySlots
+                  .findIndex(
+                    candidate =>
+                      candidate.kind ===
+                        "item" &&
+                      candidate.itemId ===
+                        embeddedItem.id
+                  )
+              : -1;
+
+
+          const itemDerived =
+            embeddedItem
+              ? getItemDerivedData(
+                  embeddedItem.system ?? {}
+                )
+              : null;
+
+
+          const bulkySlotCost =
+            itemDerived?.bulky
+              ? Math.max(
+                  2,
+                  Math.trunc(
+                    Number(
+                      itemDerived.slotCost
+                    ) || 2
+                  )
+                )
+              : 1;
+
+
+          const bulkyPosition =
+            itemDerived?.bulky &&
+            anchorIndex >= 0
+              ? (
+                  index -
+                  anchorIndex +
+                  1
+                )
+              : 0;
+
+
+          const isBulky =
+            Boolean(
+              itemDerived?.bulky &&
+              bulkyPosition >= 1 &&
+              bulkyPosition <=
+                bulkySlotCost
+            );
+
+
+          const isBulkyAnchor =
+            isBulky &&
+            slot.kind === "item" &&
+            bulkyPosition === 1;
+
+
+          const isBulkyReserved =
+            isBulky &&
+            slot.kind ===
+              "reserved";
 
 
           let kindLabel =
@@ -192,6 +286,20 @@ export class DelverCharacterSheet extends ActorSheet {
             itemImg =
               embeddedItem?.img ??
               "";
+          }
+
+
+          if (
+            slot.kind === "reserved"
+          ) {
+
+            kindLabel =
+              "Reserved";
+
+
+            displayLabel =
+              embeddedItem?.name ??
+              "Reserved";
           }
 
 
@@ -239,7 +347,30 @@ export class DelverCharacterSheet extends ActorSheet {
                 embeddedItem
               ),
 
-            itemImg
+            itemImg,
+
+            isBulky,
+            isBulkyAnchor,
+            isBulkyReserved,
+
+            bulkySlotCost:
+              isBulky
+                ? bulkySlotCost
+                : 1,
+
+            bulkyPosition:
+              isBulky
+                ? bulkyPosition
+                : 0,
+
+            bulkyStart:
+              isBulky &&
+              bulkyPosition === 1,
+
+            bulkyEnd:
+              isBulky &&
+              bulkyPosition ===
+                bulkySlotCost
           };
         }
       );
@@ -272,9 +403,10 @@ export class DelverCharacterSheet extends ActorSheet {
     const equippedArmorItems =
       this.actor.items.filter(
         item =>
-          item.system
-            ?.category ===
-            "armor" &&
+          normalizeItemCategory(
+            item.system
+              ?.category
+          ) === "armor" &&
 
           this._isItemEquippable(
             item
@@ -621,6 +753,15 @@ export class DelverCharacterSheet extends ActorSheet {
       )
     );
 
+    html.find(
+      ".level-up-action"
+    ).on(
+      "click",
+      this._onLevelUp.bind(
+        this
+      )
+    );
+
 
     /* ------------------------------------------------------ */
     /* INTEGRITY                                              */
@@ -741,6 +882,195 @@ export class DelverCharacterSheet extends ActorSheet {
       ._ensureInventoryIntegrity();
   }
 
+  /* ======================================================== */
+  /* LEVEL UP                                                 */
+  /* ======================================================== */
+
+  async _onLevelUp(event) {
+    event.preventDefault();
+
+
+    if (
+      !this.isEditable
+    ) {
+
+      return;
+    }
+
+
+    /*
+     * Direct Level editing remains available for GM correction.
+     * This button is the actual Delver level-up workflow.
+     */
+    await this.submit({
+      preventClose:
+        true,
+
+      preventRender:
+        true
+    });
+
+
+    const systemData =
+      this._buildCharacterData(
+        this.actor.system ?? {}
+      );
+
+
+    const currentLevel =
+      Math.max(
+        0,
+        Math.trunc(
+          this._numberOr(
+            systemData.identity
+              ?.level,
+            1
+          )
+        )
+      );
+
+
+    const currentScars =
+      Math.max(
+        0,
+        Math.trunc(
+          this._numberOr(
+            systemData.resources
+              ?.scars,
+            0
+          )
+        )
+      );
+
+
+    const currentMaxHp =
+      Math.max(
+        0,
+        Math.trunc(
+          this._numberOr(
+            systemData.resources
+              ?.hp
+              ?.max,
+            1
+          )
+        )
+      );
+
+
+    const slots =
+      this._normalizeInventorySlots(
+        systemData.inventory
+          ?.slots
+      );
+
+
+    const woundCount =
+      slots.filter(
+        slot =>
+          slot.kind ===
+          "wound"
+      ).length;
+
+
+    /*
+     * Level-up lifecycle:
+     *
+     * Wounds -> Scars
+     * All Scars -> Max HP
+     *
+     * Therefore every existing Scar plus every current
+     * Wound becomes +1 Max HP during this level-up.
+     */
+    const hpGain =
+      currentScars +
+      woundCount;
+
+
+    const newLevel =
+      currentLevel + 1;
+
+
+    const newMaxHp =
+      currentMaxHp +
+      hpGain;
+
+
+    const confirmed =
+      await foundry
+        .applications
+        .api
+        .DialogV2
+        .confirm({
+
+          window: {
+            title:
+              `Level Up to ${newLevel}`
+          },
+
+          content:
+            `<p>Advance to Level <strong>${newLevel}</strong>?</p>` +
+            `<p>Current Wounds become Scars, then all ` +
+            `Scars convert into Max HP.</p>` +
+            `<ul>` +
+            `<li>Wounds converted: <strong>${woundCount}</strong></li>` +
+            `<li>Existing Scars converted: <strong>${currentScars}</strong></li>` +
+            `<li>Max HP: <strong>${currentMaxHp}</strong> → <strong>${newMaxHp}</strong></li>` +
+            `</ul>`,
+
+          yes: {
+            label:
+              "Level Up"
+          },
+
+          no: {
+            label:
+              "Cancel"
+          },
+
+          rejectClose:
+            false,
+
+          modal:
+            true
+        });
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    const leveledSlots =
+      slots.map(
+        slot =>
+          slot.kind ===
+          "wound"
+            ? emptyInventorySlot()
+            : slot
+      );
+
+
+    await this.actor.update({
+      "system.identity.level":
+        newLevel,
+
+      "system.resources.scars":
+        0,
+
+      "system.resources.hp.max":
+        newMaxHp,
+
+      "system.inventory.slots":
+        leveledSlots
+    });
+
+
+    ui.notifications.info(
+      hpGain > 0
+        ? `Level ${newLevel}: +${hpGain} Max HP.`
+        : `Advanced to Level ${newLevel}.`
+    );
+  }
 
   /* ======================================================== */
   /* CONTEXT MENUS                                            */
@@ -1351,24 +1681,8 @@ export class DelverCharacterSheet extends ActorSheet {
     }
 
 
-    const category =
-      item.system
-        ?.category ??
-      "misc";
-
-
-    if (
-      category === "weapon" ||
-      category === "armor"
-    ) {
-
-      return true;
-    }
-
-
-    return Boolean(
-      item.system
-        ?.equippable
+    return isItemEquippable(
+      item.system ?? {}
     );
   }
 
@@ -1501,10 +1815,10 @@ export class DelverCharacterSheet extends ActorSheet {
 
       {
         name:
-          "Clear Wound",
+          "Recover Wound",
 
         icon:
-          '<i class="fa-solid fa-xmark"></i>',
+          '<i class="fa-solid fa-bandage"></i>',
 
         classes:
           "delver-context-condition-clear",
@@ -1523,11 +1837,10 @@ export class DelverCharacterSheet extends ActorSheet {
           async target => {
 
             await this
-              ._confirmClearInventoryCondition(
+              ._confirmRecoverInventoryWound(
                 this._getSlotIndexFromContext(
                   target
-                ),
-                "wound"
+                )
               );
           }
       },
@@ -1672,6 +1985,141 @@ export class DelverCharacterSheet extends ActorSheet {
     });
   }
 
+    async _confirmRecoverInventoryWound(
+    index
+  ) {
+
+    const slots =
+      this._normalizeInventorySlots(
+        this.actor.system
+          ?.inventory
+          ?.slots
+      );
+
+
+    if (
+      index < 0 ||
+      index >= slots.length ||
+      slots[index].kind !==
+        "wound"
+    ) {
+
+      return;
+    }
+
+
+    const confirmed =
+      await foundry
+        .applications
+        .api
+        .DialogV2
+        .confirm({
+
+          window: {
+            title:
+              "Recover Wound"
+          },
+
+          content:
+            `<p>Recover the Wound in inventory slot ${index + 1}?</p>` +
+            `<p>The Wound is removed and becomes <strong>1 Scar</strong>.</p>`,
+
+          yes: {
+            label:
+              "Recover Wound"
+          },
+
+          no: {
+            label:
+              "Cancel"
+          },
+
+          rejectClose:
+            false,
+
+          modal:
+            true
+        });
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    await this
+      ._recoverInventoryWound(
+        index
+      );
+  }
+
+
+  async _recoverInventoryWound(
+    index
+  ) {
+
+    /*
+     * Preserve edits currently typed elsewhere on the
+     * Character sheet before applying recovery.
+     */
+    await this.submit({
+      preventClose:
+        true,
+
+      preventRender:
+        true
+    });
+
+
+    const systemData =
+      this._buildCharacterData(
+        this.actor.system ?? {}
+      );
+
+
+    const slots =
+      this._normalizeInventorySlots(
+        systemData.inventory
+          ?.slots
+      );
+
+
+    if (
+      index < 0 ||
+      index >= slots.length ||
+      slots[index].kind !==
+        "wound"
+    ) {
+
+      return;
+    }
+
+
+    const scars =
+      Math.max(
+        0,
+        Math.trunc(
+          this._numberOr(
+            systemData.resources
+              ?.scars,
+            0
+          )
+        )
+      );
+
+
+    slots[index] =
+      emptyInventorySlot();
+
+
+    await this.actor.update({
+      "system.inventory.slots":
+        slots,
+
+      "system.resources.scars":
+        scars + 1
+    });
+  }
 
   async _confirmClearInventoryCondition(
     index,
@@ -1873,6 +2321,13 @@ export class DelverCharacterSheet extends ActorSheet {
           ];
 
 
+      /*
+       * Lightweight hover feedback only.
+       *
+       * Exact multi-slot validation happens on drop because
+       * external Foundry Item drags are not guaranteed to
+       * expose the complete source Item during dragover.
+       */
       const valid =
         Number.isInteger(
           targetIndex
@@ -2045,14 +2500,6 @@ export class DelverCharacterSheet extends ActorSheet {
       );
 
 
-    if (
-      carryMode === "slot"
-    ) {
-
-      return false;
-    }
-
-
     await this
       ._dropItemIntoCarryMode(
         sourceItem,
@@ -2063,10 +2510,6 @@ export class DelverCharacterSheet extends ActorSheet {
     return true;
   }
 
-
-  /* ======================================================== */
-  /* DROP INTO SLOT                                           */
-  /* ======================================================== */
 
   async _dropItemIntoSlot(
     sourceItem,
@@ -2143,7 +2586,8 @@ export class DelverCharacterSheet extends ActorSheet {
       ._copyExternalItemToSlot(
         sourceItem,
         targetIndex,
-        slots
+        slots,
+        capacity
       );
   }
 
@@ -2182,29 +2626,72 @@ export class DelverCharacterSheet extends ActorSheet {
       );
 
 
+    const sourceSlotCost =
+      this._getItemSlotCost(
+        item
+      );
+
+
     if (
       sourceIndex >= 0 &&
-      sourceIndex < capacity
+      sourceIndex +
+        sourceSlotCost <=
+        capacity &&
+      this._itemAllocationIsComplete(
+        item,
+        sourceIndex,
+        slots
+      )
     ) {
 
       return;
     }
 
 
-    const targetIndex =
-      slots.findIndex(
-        (slot, index) =>
-          index < capacity &&
-          slot.kind === "empty"
-      );
+    let targetIndex =
+      -1;
+
+
+    for (
+      let index = 0;
+      index < capacity;
+      index++
+    ) {
+
+      const test =
+        this._canAllocateItemAtSlot(
+          item,
+          index,
+          slots,
+          capacity,
+          item.id
+        );
+
+
+      if (test.valid) {
+
+        targetIndex =
+          index;
+
+        break;
+      }
+    }
 
 
     if (
       targetIndex === -1
     ) {
 
+      const slotCost =
+        this._getItemSlotCost(
+          item
+        );
+
+
       ui.notifications.warn(
-        "No available inventory slot."
+        slotCost > 1
+          ? `No run of ${slotCost} available inventory slots can hold ${item.name}.`
+          : "No available inventory slot."
       );
 
 
@@ -2237,17 +2724,19 @@ export class DelverCharacterSheet extends ActorSheet {
       );
 
 
-    if (
-      sourceIndex ===
-      targetIndex
-    ) {
-
-      return;
-    }
+    const sourceSlotCost =
+      this._getItemSlotCost(
+        item
+      );
 
 
     const targetSlot =
       slots[targetIndex];
+
+
+    if (!targetSlot) {
+      return;
+    }
 
 
     if (
@@ -2264,125 +2753,57 @@ export class DelverCharacterSheet extends ActorSheet {
     }
 
 
-    /* NON-SLOT -> SLOT */
-
     if (
-      sourceIndex === -1
+      targetSlot.kind === "reserved" &&
+      targetSlot.itemId !== item.id
     ) {
 
+      ui.notifications.warn(
+        "That slot is reserved by a multi-slot Item."
+      );
+
+
+      return;
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* SIMPLE 1-SLOT SWAP                                     */
+    /* ------------------------------------------------------ */
+
+    if (
+      sourceIndex >= 0 &&
+      sourceSlotCost === 1 &&
+      targetSlot.kind === "item" &&
+      targetSlot.itemId !== item.id
+    ) {
+
+      const targetItem =
+        this.actor.items.get(
+          targetSlot.itemId
+        );
+
+
+      const targetSlotCost =
+        targetItem
+          ? this._getItemSlotCost(
+              targetItem
+            )
+          : 1;
+
+
       if (
-        targetSlot.kind !== "empty"
+        targetSlotCost > 1
       ) {
 
         ui.notifications.warn(
-          "Move the current Item out of that slot first."
+          "Move the multi-slot Item out of that space first."
         );
 
 
         return;
       }
 
-
-      const previousCarryMode =
-        this._normalizeCarryMode(
-          item.system
-            ?.carryMode
-        );
-
-
-      if (
-        previousCarryMode !== "slot"
-      ) {
-
-        await item.update({
-          "system.carryMode":
-            "slot",
-
-          "system.equipped":
-            false
-        });
-      }
-
-
-      slots[targetIndex] = {
-        kind:
-          "item",
-
-        itemId:
-          item.id,
-
-        label:
-          ""
-      };
-
-
-      try {
-
-        await this.actor.update({
-          "system.inventory.slots":
-            slots
-        });
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Delver | Failed to assign owned Item to inventory slot:",
-          error
-        );
-
-
-        if (
-          previousCarryMode !==
-          "slot"
-        ) {
-
-          await item.update({
-            "system.carryMode":
-              previousCarryMode,
-
-            "system.equipped":
-              false
-          });
-        }
-      }
-
-
-      return;
-    }
-
-
-    /* SLOT -> EMPTY */
-
-    if (
-      targetSlot.kind === "empty"
-    ) {
-
-      slots[targetIndex] = {
-        ...slots[sourceIndex]
-      };
-
-
-      slots[sourceIndex] =
-        emptyInventorySlot();
-
-
-      await this.actor.update({
-        "system.inventory.slots":
-          slots
-      });
-
-
-      return;
-    }
-
-
-    /* SLOT -> ITEM SWAP */
-
-    if (
-      targetSlot.kind === "item"
-    ) {
 
       if (
         sourceIndex >=
@@ -2416,6 +2837,122 @@ export class DelverCharacterSheet extends ActorSheet {
         "system.inventory.slots":
           slots
       });
+
+
+      return;
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* MULTI-SLOT / EMPTY DESTINATION                         */
+    /* ------------------------------------------------------ */
+
+    if (
+      targetSlot.kind === "item" &&
+      targetSlot.itemId !== item.id
+    ) {
+
+      ui.notifications.warn(
+        "Move the current Item out of that slot first."
+      );
+
+
+      return;
+    }
+
+
+    const workingSlots =
+      slots.map(
+        slot => ({
+          ...slot
+        })
+      );
+
+
+    this._clearItemAllocation(
+      workingSlots,
+      item.id
+    );
+
+
+    const allocation =
+      this._canAllocateItemAtSlot(
+        item,
+        targetIndex,
+        workingSlots,
+        inventoryCapacity
+      );
+
+
+    if (!allocation.valid) {
+
+      ui.notifications.warn(
+        allocation.reason
+      );
+
+
+      return;
+    }
+
+
+    const previousCarryMode =
+      this._normalizeCarryMode(
+        item.system
+          ?.carryMode
+      );
+
+
+    if (
+      previousCarryMode !== "slot"
+    ) {
+
+      await item.update({
+        "system.carryMode":
+          "slot",
+
+        "system.equipped":
+          false
+      });
+    }
+
+
+    this._allocateItemAtSlot(
+      workingSlots,
+      item,
+      targetIndex
+    );
+
+
+    try {
+
+      await this.actor.update({
+        "system.inventory.slots":
+          workingSlots
+      });
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Delver | Failed to assign owned Item to inventory slots:",
+        error
+      );
+
+
+      if (
+        previousCarryMode !==
+        "slot"
+      ) {
+
+        await item.update({
+          "system.carryMode":
+            previousCarryMode,
+
+          "system.equipped":
+            false
+        });
+      }
     }
   }
 
@@ -2423,16 +2960,23 @@ export class DelverCharacterSheet extends ActorSheet {
   async _copyExternalItemToSlot(
     sourceItem,
     targetIndex,
-    slots
+    slots,
+    inventoryCapacity
   ) {
 
-    if (
-      slots[targetIndex].kind !==
-      "empty"
-    ) {
+    const allocation =
+      this._canAllocateItemAtSlot(
+        sourceItem,
+        targetIndex,
+        slots,
+        inventoryCapacity
+      );
+
+
+    if (!allocation.valid) {
 
       ui.notifications.warn(
-        "That inventory slot is already occupied."
+        allocation.reason
       );
 
 
@@ -2453,16 +2997,11 @@ export class DelverCharacterSheet extends ActorSheet {
     }
 
 
-    slots[targetIndex] = {
-      kind:
-        "item",
-
-      itemId:
-        embeddedItem.id,
-
-      label:
-        ""
-    };
+    this._allocateItemAtSlot(
+      slots,
+      embeddedItem,
+      targetIndex
+    );
 
 
     try {
@@ -2477,7 +3016,7 @@ export class DelverCharacterSheet extends ActorSheet {
     catch (error) {
 
       console.error(
-        "Delver | Item embedded but slot assignment failed:",
+        "Delver | Item embedded but multi-slot assignment failed:",
         error
       );
 
@@ -2491,7 +3030,6 @@ export class DelverCharacterSheet extends ActorSheet {
         );
     }
   }
-
 
   /* ======================================================== */
   /* OTHER CARRY LOCATIONS                                    */
@@ -2566,30 +3104,11 @@ export class DelverCharacterSheet extends ActorSheet {
       );
 
 
-    let changedSlots =
-      false;
-
-
-    for (
-      let index = 0;
-      index < slots.length;
-      index++
-    ) {
-
-      if (
-        slots[index].kind === "item" &&
-        slots[index].itemId ===
-          item.id
-      ) {
-
-        slots[index] =
-          emptyInventorySlot();
-
-
-        changedSlots =
-          true;
-      }
-    }
+    const changedSlots =
+      this._clearItemAllocation(
+        slots,
+        item.id
+      );
 
 
     await item.update({
@@ -2740,30 +3259,11 @@ export class DelverCharacterSheet extends ActorSheet {
       );
 
 
-    let changed =
-      false;
-
-
-    for (
-      let index = 0;
-      index < slots.length;
-      index++
-    ) {
-
-      if (
-        slots[index].kind === "item" &&
-        slots[index].itemId ===
-          itemId
-      ) {
-
-        slots[index] =
-          emptyInventorySlot();
-
-
-        changed =
-          true;
-      }
-    }
+    const changed =
+      this._clearItemAllocation(
+        slots,
+        itemId
+      );
 
 
     if (!changed) {
@@ -2933,9 +3433,13 @@ export class DelverCharacterSheet extends ActorSheet {
       false;
 
 
-    const seenItemIds =
-      new Set();
+    const anchorByItemId =
+      new Map();
 
+
+    /* ------------------------------------------------------ */
+    /* VALIDATE ANCHORS                                       */
+    /* ------------------------------------------------------ */
 
     for (
       let index = 0;
@@ -2968,17 +3472,15 @@ export class DelverCharacterSheet extends ActorSheet {
         slots[index] =
           emptyInventorySlot();
 
-
         changed =
           true;
-
 
         continue;
       }
 
 
       if (
-        seenItemIds.has(
+        anchorByItemId.has(
           item.id
         )
       ) {
@@ -2986,18 +3488,11 @@ export class DelverCharacterSheet extends ActorSheet {
         slots[index] =
           emptyInventorySlot();
 
-
         changed =
           true;
 
-
         continue;
       }
-
-
-      seenItemIds.add(
-        item.id
-      );
 
 
       if (
@@ -3010,9 +3505,251 @@ export class DelverCharacterSheet extends ActorSheet {
         slots[index] =
           emptyInventorySlot();
 
+        changed =
+          true;
+
+        continue;
+      }
+
+
+      anchorByItemId.set(
+        item.id,
+        index
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* CLEAN ORPHAN RESERVATIONS                              */
+    /* ------------------------------------------------------ */
+
+    for (
+      let index = 0;
+      index < slots.length;
+      index++
+    ) {
+
+      const slot =
+        slots[index];
+
+
+      if (
+        slot.kind !==
+        "reserved"
+      ) {
+
+        continue;
+      }
+
+
+      const item =
+        slot.itemId
+          ? this.actor.items.get(
+              slot.itemId
+            )
+          : null;
+
+
+      if (
+        !item ||
+        !anchorByItemId.has(
+          item.id
+        ) ||
+        this._normalizeCarryMode(
+          item.system
+            ?.carryMode
+        ) !== "slot"
+      ) {
+
+        slots[index] =
+          emptyInventorySlot();
 
         changed =
           true;
+      }
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* REBUILD EACH ITEM'S EXACT SLOT FOOTPRINT               */
+    /* ------------------------------------------------------ */
+
+    for (
+      const [
+        itemId,
+        anchorIndex
+      ] of
+        anchorByItemId.entries()
+    ) {
+
+      const item =
+        this.actor.items.get(
+          itemId
+        );
+
+
+      if (!item) {
+        continue;
+      }
+
+
+      const slotCost =
+        this._getItemSlotCost(
+          item
+        );
+
+
+      const lastIndex =
+        anchorIndex +
+        slotCost -
+        1;
+
+
+      let footprintBlocked =
+        lastIndex >=
+        DELVER_MAX_INVENTORY_SLOTS;
+
+
+      if (!footprintBlocked) {
+
+        for (
+          let index =
+            anchorIndex;
+          index <= lastIndex;
+          index++
+        ) {
+
+          const slot =
+            slots[index];
+
+
+          const belongsToItem =
+            (
+              slot.kind === "item" ||
+              slot.kind === "reserved"
+            ) &&
+            slot.itemId === itemId;
+
+
+          if (
+            slot.kind !== "empty" &&
+            !belongsToItem
+          ) {
+
+            footprintBlocked =
+              true;
+
+            break;
+          }
+        }
+      }
+
+
+      if (footprintBlocked) {
+
+        if (
+          this._clearItemAllocation(
+            slots,
+            itemId
+          )
+        ) {
+
+          changed =
+            true;
+        }
+
+
+        continue;
+      }
+
+
+      /*
+       * If slot cost was reduced in Item Properties,
+       * clean reservations that are no longer required.
+       */
+      for (
+        let index = 0;
+        index < slots.length;
+        index++
+      ) {
+
+        if (
+          index >= anchorIndex &&
+          index <= lastIndex
+        ) {
+
+          continue;
+        }
+
+
+        if (
+          slots[index].kind ===
+            "reserved" &&
+          slots[index].itemId ===
+            itemId
+        ) {
+
+          slots[index] =
+            emptyInventorySlot();
+
+          changed =
+            true;
+        }
+      }
+
+
+      const desiredAnchor = {
+        kind:
+          "item",
+
+        itemId,
+
+        label:
+          ""
+      };
+
+
+      if (
+        slots[anchorIndex].kind !==
+          desiredAnchor.kind ||
+        slots[anchorIndex].itemId !==
+          desiredAnchor.itemId ||
+        slots[anchorIndex].label !==
+          desiredAnchor.label
+      ) {
+
+        slots[anchorIndex] =
+          desiredAnchor;
+
+        changed =
+          true;
+      }
+
+
+      for (
+        let index =
+          anchorIndex + 1;
+        index <= lastIndex;
+        index++
+      ) {
+
+        if (
+          slots[index].kind !==
+            "reserved" ||
+          slots[index].itemId !==
+            itemId ||
+          slots[index].label !==
+            ""
+        ) {
+
+          slots[index] =
+            reservedInventorySlot(
+              itemId
+            );
+
+          changed =
+            true;
+        }
       }
     }
 
@@ -3037,48 +3774,16 @@ export class DelverCharacterSheet extends ActorSheet {
     this.render(false);
   }
 
-
   /* ======================================================== */
   /* ITEM VIEW DATA                                           */
   /* ======================================================== */
 
   _itemViewData(item) {
 
-    const category =
-      item.system
-        ?.category ??
-      "misc";
-
-
-    let categoryLabel =
-      "Misc";
-
-
-    if (
-      category === "weapon"
-    ) {
-
-      categoryLabel =
-        "Weapon";
-    }
-
-
-    if (
-      category === "armor"
-    ) {
-
-      categoryLabel =
-        "Armor";
-    }
-
-
-    if (
-      category === "spell-vessel"
-    ) {
-
-      categoryLabel =
-        "Spell Vessel";
-    }
+    const derived =
+      getItemDerivedData(
+        item.system ?? {}
+      );
 
 
     return {
@@ -3091,9 +3796,11 @@ export class DelverCharacterSheet extends ActorSheet {
       img:
         item.img,
 
-      category,
+      category:
+        derived.category,
 
-      categoryLabel,
+      categoryLabel:
+        derived.categoryLabel,
 
       carryMode:
         this._normalizeCarryMode(
@@ -3102,15 +3809,31 @@ export class DelverCharacterSheet extends ActorSheet {
         ),
 
       equippable:
-        this._isItemEquippable(
-          item
-        ),
+        derived.equippable,
 
       equipped:
         Boolean(
           item.system
             ?.equipped
-        )
+        ),
+
+      magical:
+        derived.magical,
+
+      keyItem:
+        derived.traits.keyItem,
+
+      bulky:
+        derived.bulky,
+
+      slotCost:
+        derived.slotCost,
+
+      quality:
+        derived.quality,
+
+      decay:
+        derived.decay
     };
   }
 
@@ -3395,6 +4118,303 @@ export class DelverCharacterSheet extends ActorSheet {
 
 
   /* ======================================================== */
+  /* MULTI-SLOT INVENTORY HELPERS                             */
+  /* ======================================================== */
+
+  _getItemSlotCost(item) {
+
+    if (!item) {
+      return 1;
+    }
+
+
+    const derived =
+      getItemDerivedData(
+        item.system ?? {}
+      );
+
+
+    return Math.max(
+      1,
+      Math.trunc(
+        Number(
+          derived.slotCost
+        ) || 1
+      )
+    );
+  }
+
+
+  _clearItemAllocation(
+    slots,
+    itemId
+  ) {
+
+    if (!itemId) {
+      return false;
+    }
+
+
+    let changed =
+      false;
+
+
+    for (
+      let index = 0;
+      index < slots.length;
+      index++
+    ) {
+
+      const slot =
+        slots[index];
+
+
+      if (
+        (
+          slot.kind === "item" ||
+          slot.kind === "reserved"
+        ) &&
+        slot.itemId === itemId
+      ) {
+
+        slots[index] =
+          emptyInventorySlot();
+
+        changed =
+          true;
+      }
+    }
+
+
+    return changed;
+  }
+
+
+  _canAllocateItemAtSlot(
+    item,
+    targetIndex,
+    slots,
+    inventoryCapacity,
+    ignoreItemId = ""
+  ) {
+
+    const slotCost =
+      this._getItemSlotCost(
+        item
+      );
+
+
+    if (
+      !Number.isInteger(
+        targetIndex
+      ) ||
+      targetIndex < 0 ||
+      targetIndex >=
+        inventoryCapacity
+    ) {
+
+      return {
+        valid:
+          false,
+
+        slotCost,
+
+        reason:
+          `Inventory slot ${targetIndex + 1} is unavailable.`
+      };
+    }
+
+
+    if (
+      targetIndex +
+        slotCost >
+        inventoryCapacity
+    ) {
+
+      return {
+        valid:
+          false,
+
+        slotCost,
+
+        reason:
+          slotCost > 1
+            ? `${item.name} needs ${slotCost} consecutive available inventory slots.`
+            : "No available inventory slot."
+      };
+    }
+
+
+    for (
+      let index = targetIndex;
+      index <
+        targetIndex +
+        slotCost;
+      index++
+    ) {
+
+      const slot =
+        slots[index];
+
+
+      const belongsToIgnoredItem =
+        Boolean(
+          ignoreItemId
+        ) &&
+        (
+          slot?.kind === "item" ||
+          slot?.kind === "reserved"
+        ) &&
+        slot?.itemId ===
+          ignoreItemId;
+
+
+      if (
+        slot?.kind !== "empty" &&
+        !belongsToIgnoredItem
+      ) {
+
+        return {
+          valid:
+            false,
+
+          slotCost,
+
+          reason:
+            slot?.kind === "wound" ||
+            slot?.kind === "fatigue"
+              ? "Items cannot replace Wounds or Fatigue."
+              : slot?.kind === "reserved"
+                ? "One or more required slots are reserved by another multi-slot Item."
+                : slotCost > 1
+                  ? `${item.name} needs ${slotCost} consecutive empty inventory slots.`
+                  : "That inventory slot is already occupied."
+        };
+      }
+    }
+
+
+    return {
+      valid:
+        true,
+
+      slotCost,
+
+      reason:
+        ""
+    };
+  }
+
+
+  _allocateItemAtSlot(
+    slots,
+    item,
+    targetIndex
+  ) {
+
+    const slotCost =
+      this._getItemSlotCost(
+        item
+      );
+
+
+    this._clearItemAllocation(
+      slots,
+      item.id
+    );
+
+
+    slots[targetIndex] = {
+      kind:
+        "item",
+
+      itemId:
+        item.id,
+
+      label:
+        ""
+    };
+
+
+    for (
+      let offset = 1;
+      offset < slotCost;
+      offset++
+    ) {
+
+      slots[
+        targetIndex +
+        offset
+      ] =
+        reservedInventorySlot(
+          item.id
+        );
+    }
+  }
+
+
+  _itemAllocationIsComplete(
+    item,
+    anchorIndex,
+    slots
+  ) {
+
+    const slotCost =
+      this._getItemSlotCost(
+        item
+      );
+
+
+    if (
+      anchorIndex < 0 ||
+      anchorIndex +
+        slotCost >
+        slots.length
+    ) {
+
+      return false;
+    }
+
+
+    if (
+      slots[anchorIndex].kind !==
+        "item" ||
+      slots[anchorIndex].itemId !==
+        item.id
+    ) {
+
+      return false;
+    }
+
+
+    for (
+      let offset = 1;
+      offset < slotCost;
+      offset++
+    ) {
+
+      const slot =
+        slots[
+          anchorIndex +
+          offset
+        ];
+
+
+      if (
+        slot.kind !== "reserved" ||
+        slot.itemId !== item.id
+      ) {
+
+        return false;
+      }
+    }
+
+
+    return true;
+  }
+
+
+  /* ======================================================== */
   /* SLOT NORMALIZATION                                       */
   /* ======================================================== */
 
@@ -3444,8 +4464,12 @@ export class DelverCharacterSheet extends ActorSheet {
           kind,
 
           itemId:
-            oldSlot.itemId ??
-            "",
+            (
+              kind === "item" ||
+              kind === "reserved"
+            )
+              ? oldSlot.itemId ?? ""
+              : "",
 
           label:
             kind === "item"
@@ -3455,8 +4479,7 @@ export class DelverCharacterSheet extends ActorSheet {
       }
     );
   }
-
-
+  
   /* ======================================================== */
   /* CHARACTER MIGRATION                                      */
   /* ======================================================== */

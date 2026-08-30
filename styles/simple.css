@@ -240,6 +240,27 @@
   min-width: 70px;
 }
 
+.meta-field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+.level-up-action {
+  width: 28px;
+  min-width: 28px;
+
+  height: 18px;
+  min-height: 18px;
+
+  padding: 0 4px;
+
+  line-height: 16px;
+
+  font-size: 10px;
+  font-weight: 900;
+}
 
 .meta-field input[type="number"] {
   width: 64px;
@@ -1422,4 +1443,1390 @@
   .delver-damage-window {
     min-width: 360px;
   }
+}
+/* ========================================================== */
+/* ITEM V3 SHEET                                              */
+/* ========================================================== */
+
+.delver-item-v3-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+
+/* ---------------------------------------------------------- */
+/* HEADER                                                     */
+/* ---------------------------------------------------------- */
+
+.delver-item-header-v3 {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  align-items: center;
+  gap: 12px;
+
+  padding: 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+
+.delver-item-portrait-wrap {
+  position: relative;
+
+  width: 76px;
+  height: 76px;
+}
+
+
+.delver-item-image-v3 {
+  width: 76px;
+  height: 76px;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9px;
+
+  object-fit: cover;
+
+  cursor: pointer;
+}
+
+
+.delver-item-magical-mark {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 25px;
+  height: 25px;
+
+  border: 1px solid rgba(190, 145, 255, 0.58);
+  border-radius: 50%;
+
+  background: rgba(75, 45, 105, 0.96);
+
+  box-shadow:
+    0 0 10px rgba(165, 105, 255, 0.34);
+
+  font-size: 11px;
+}
+
+
+.delver-item-v3-sheet.is-magical
+.delver-item-header-v3 {
+  border-color: rgba(175, 125, 245, 0.34);
+
+  box-shadow:
+    inset 0 0 18px rgba(130, 75, 210, 0.06);
+}
+
+
+.delver-item-title-block {
+  min-width: 0;
+}
+
+
+.delver-item-title-block > label {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  opacity: 0.55;
+
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+.delver-item-name-input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 2px;
+
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+  outline: none;
+  box-shadow: none;
+
+  background: transparent;
+
+  font-size: 25px;
+  font-weight: 900;
+}
+
+
+.delver-item-summary-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  margin-top: 7px;
+}
+
+
+.delver-item-type-chip,
+.delver-item-summary-chip {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 21px;
+
+  padding: 2px 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+}
+
+
+.delver-item-summary-chip.magical {
+  border-color: rgba(175, 125, 245, 0.35);
+
+  background: rgba(125, 75, 190, 0.10);
+}
+
+
+.delver-item-summary-chip.bulky {
+  border-color: rgba(115, 135, 245, 0.40);
+
+  background: rgba(95, 90, 200, 0.12);
+}
+
+
+/* ---------------------------------------------------------- */
+/* PANELS                                                     */
+/* ---------------------------------------------------------- */
+
+.delver-item-panel {
+  padding: 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+
+.delver-item-panel.compact {
+  padding-bottom: 8px;
+}
+
+
+.delver-item-panel-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+
+.delver-item-panel-heading h2 {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+
+.delver-item-panel-heading span {
+  font-size: 9px;
+  font-weight: 700;
+
+  opacity: 0.44;
+}
+
+
+/* ---------------------------------------------------------- */
+/* FIELD GRIDS                                                */
+/* ---------------------------------------------------------- */
+
+.delver-item-grid {
+  display: grid;
+
+  gap: 8px;
+}
+
+
+.delver-item-grid.three {
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+}
+
+
+.delver-item-grid.two {
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+}
+
+
+.delver-item-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  min-width: 0;
+}
+
+
+.delver-item-field.narrow {
+  max-width: 180px;
+}
+
+
+.delver-item-field > label {
+  font-size: 10px;
+  font-weight: 900;
+
+  opacity: 0.68;
+}
+
+
+.delver-item-field select,
+.delver-item-field input[type="number"],
+.delver-item-field input[type="text"] {
+  width: 100%;
+  height: 30px;
+}
+
+
+.delver-item-field small {
+  font-size: 8px;
+  line-height: 1.25;
+
+  opacity: 0.48;
+}
+
+
+.delver-item-static-value {
+  display: flex;
+  align-items: center;
+
+  min-height: 30px;
+
+  padding: 0 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+
+  background: rgba(0, 0, 0, 0.10);
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.delver-item-static-value.muted {
+  opacity: 0.58;
+}
+
+
+/* ---------------------------------------------------------- */
+/* DERIVED STRIP                                              */
+/* ---------------------------------------------------------- */
+
+.delver-item-derived-strip {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(95px, 1fr)
+    );
+
+  gap: 6px;
+
+  margin-top: 8px;
+}
+
+
+.delver-item-derived-strip > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+
+  padding: 6px 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+
+  background: rgba(0, 0, 0, 0.08);
+}
+
+
+.delver-item-derived-strip span {
+  font-size: 8px;
+  font-weight: 800;
+
+  opacity: 0.48;
+
+  text-transform: uppercase;
+}
+
+
+.delver-item-derived-strip strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+
+.delver-item-rule-note {
+  margin: 7px 0 0;
+
+  font-size: 9px;
+  line-height: 1.35;
+
+  opacity: 0.55;
+}
+
+
+/* ---------------------------------------------------------- */
+/* TRAIT CARDS                                                */
+/* ---------------------------------------------------------- */
+
+.delver-item-toggle-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 6px;
+}
+
+
+.delver-item-toggle-card {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+
+  align-items: center;
+
+  gap: 6px;
+
+  min-height: 48px;
+
+  padding: 6px 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  cursor: pointer;
+}
+
+
+.delver-item-toggle-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+
+.delver-item-toggle-card.locked {
+  cursor: default;
+
+  opacity: 0.65;
+}
+
+
+.delver-item-toggle-card.bulky {
+  border-color: rgba(115, 135, 245, 0.24);
+}
+
+
+.delver-item-toggle-card > input {
+  margin: 0;
+}
+
+
+.delver-item-toggle-card > i {
+  width: 18px;
+
+  text-align: center;
+
+  opacity: 0.58;
+}
+
+
+.delver-item-toggle-card > span {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1px;
+}
+
+
+.delver-item-toggle-card strong {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+.delver-item-toggle-card small {
+  font-size: 8px;
+  line-height: 1.25;
+
+  opacity: 0.48;
+}
+
+
+.delver-item-bulky-config {
+  display: grid;
+
+  grid-template-columns:
+    155px 1fr;
+
+  align-items: end;
+
+  gap: 10px;
+
+  margin-top: 8px;
+  padding: 7px;
+
+  border: 1px solid rgba(115, 135, 245, 0.23);
+  border-radius: 7px;
+
+  background: rgba(85, 85, 190, 0.07);
+}
+
+
+.delver-item-bulky-config p {
+  margin: 0;
+
+  font-size: 9px;
+  line-height: 1.35;
+
+  opacity: 0.58;
+}
+
+
+/* ---------------------------------------------------------- */
+/* CARRY RULES                                                */
+/* ---------------------------------------------------------- */
+
+.delver-item-carry-rule-row {
+  display: grid;
+
+  grid-template-columns:
+    60px 1fr;
+
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+.delver-item-carry-rule-label {
+  font-size: 9px;
+  font-weight: 900;
+
+  opacity: 0.55;
+
+  text-transform: uppercase;
+}
+
+
+.delver-item-carry-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+
+.delver-item-carry-chips span {
+  padding: 3px 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+
+.delver-item-runtime-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 8px;
+
+  margin-top: 8px;
+}
+
+
+.delver-item-inline-check {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  min-height: 30px;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.delver-item-inline-check input {
+  margin: 0;
+}
+
+
+.delver-item-warning {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  margin-top: 8px;
+  padding: 7px 8px;
+
+  border: 1px solid rgba(255, 195, 70, 0.30);
+  border-radius: 7px;
+
+  background: rgba(255, 190, 40, 0.06);
+
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+
+.delver-item-warning i {
+  margin-top: 2px;
+}
+
+
+/* ---------------------------------------------------------- */
+/* TYPE PANELS                                                */
+/* ---------------------------------------------------------- */
+
+.delver-item-current-die-card {
+  display: grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  align-items: center;
+
+  gap: 2px 10px;
+
+  margin-top: 8px;
+  padding: 7px 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 7px;
+
+  background: rgba(0, 0, 0, 0.08);
+}
+
+
+.delver-item-current-die-card > span {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+.delver-item-current-die-card > strong {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+
+  font-size: 23px;
+  font-weight: 900;
+}
+
+
+.delver-item-current-die-card > small {
+  font-size: 8px;
+
+  opacity: 0.48;
+}
+
+
+/* ---------------------------------------------------------- */
+/* DESCRIPTION / FOOTER                                       */
+/* ---------------------------------------------------------- */
+
+.delver-item-description-v3 textarea {
+  width: 100%;
+  min-height: 105px;
+
+  resize: vertical;
+}
+
+
+.delver-item-footer-v3 {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+.delver-item-footer-v3 button {
+  width: 125px;
+}
+
+
+/* ---------------------------------------------------------- */
+/* ITEM V3 RESPONSIVE                                         */
+/* ---------------------------------------------------------- */
+
+@media (max-width: 620px) {
+
+  .delver-item-header-v3 {
+    grid-template-columns:
+      64px 1fr;
+  }
+
+
+  .delver-item-portrait-wrap,
+  .delver-item-image-v3 {
+    width: 58px;
+    height: 58px;
+  }
+
+
+  .delver-item-grid.three,
+  .delver-item-grid.two,
+  .delver-item-toggle-grid,
+  .delver-item-runtime-grid,
+  .delver-item-bulky-config {
+    grid-template-columns:
+      1fr;
+  }
+}
+
+/* ========================================================== */
+/* NPC / ENEMY STATBLOCK V2                                   */
+/* ========================================================== */
+
+.delver-statblock-v2 {
+  min-width: 0;
+}
+
+
+.delver-statblock-header {
+  display: grid;
+
+  grid-template-columns:
+    86px
+    minmax(150px, 1.3fr)
+    repeat(4, minmax(72px, 0.65fr));
+
+  gap: 8px;
+
+  align-items: end;
+}
+
+
+.delver-statblock-portrait-wrap {
+  grid-row: 1 / span 2;
+  align-self: stretch;
+}
+
+
+.delver-statblock-portrait {
+  display: block;
+
+  width: 86px;
+  height: 86px;
+
+  object-fit: cover;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.18);
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+
+.delver-statblock-title {
+  min-width: 0;
+}
+
+
+.delver-statblock-type {
+  margin-bottom: 3px;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+
+  opacity: 0.55;
+}
+
+
+.delver-statblock-name {
+  width: 100%;
+  height: 42px;
+
+  padding: 0;
+
+  border: none;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+
+  outline: none;
+  box-shadow: none;
+
+  background: transparent;
+
+  font-size: 30px;
+  font-weight: 900;
+}
+
+
+.delver-statblock-resource,
+.delver-statblock-direct-stat {
+  min-width: 0;
+}
+
+
+.delver-statblock-resource > label,
+.delver-statblock-direct-stat > label {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  opacity: 0.78;
+}
+
+
+.delver-statblock-resource .resource-ratio {
+  gap: 3px;
+}
+
+
+.delver-statblock-resource
+.resource-ratio
+input[type="number"] {
+  min-width: 30px;
+  width: 2ch;
+
+  font-size: 24px;
+}
+
+
+.delver-statblock-resource
+.resource-ratio
+span {
+  font-size: 16px;
+}
+
+
+.delver-statblock-direct-stat
+> input[type="number"] {
+  width: 100%;
+  height: 36px;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+
+.delver-statblock-speed-input {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+
+.delver-statblock-speed-input
+input[type="number"] {
+  min-width: 0;
+  width: 100%;
+  height: 36px;
+
+  text-align: center;
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+
+.delver-statblock-speed-input span {
+  font-size: 12px;
+  font-weight: 800;
+
+  opacity: 0.65;
+}
+
+
+.delver-statblock-notes {
+  display: flex;
+
+  flex: 1 1 auto;
+
+  min-height: 260px;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+.delver-statblock-section-heading {
+  display: flex;
+
+  align-items: baseline;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding-bottom: 5px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+}
+
+
+.delver-statblock-section-heading h2 {
+  margin: 0;
+
+  font-size: 16px;
+  font-weight: 900;
+}
+
+
+.delver-statblock-section-heading span {
+  text-align: right;
+
+  font-size: 10px;
+
+  opacity: 0.55;
+}
+
+
+.delver-statblock-notes textarea {
+  flex: 1 1 auto;
+
+  min-height: 220px;
+
+  resize: vertical;
+}
+
+
+@media (max-width: 820px) {
+
+  .delver-statblock-header {
+    grid-template-columns:
+      80px
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .delver-statblock-portrait-wrap {
+    grid-row: 1 / span 2;
+  }
+
+
+  .delver-statblock-portrait {
+    width: 80px;
+    height: 80px;
+  }
+
+
+  .delver-statblock-title {
+    grid-column: 2 / span 2;
+  }
+
+
+  .delver-statblock-section-heading {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 3px;
+  }
+
+
+  .delver-statblock-section-heading span {
+    text-align: left;
+  }
+}
+
+/* ========================================================== */
+/* NPC / ENEMY OWNED INVENTORY                                */
+/* ========================================================== */
+
+.delver-statblock-inventory {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 8px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius: 6px;
+
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+
+.delver-statblock-inventory.statblock-inventory-drop-valid {
+  border-color:
+    rgba(77, 179, 255, 0.85);
+
+  background:
+    rgba(77, 179, 255, 0.08);
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(77, 179, 255, 0.22);
+}
+
+
+.delver-statblock-inventory-heading {
+  align-items: center;
+}
+
+
+.delver-statblock-inventory-heading
+> div:first-child {
+  min-width: 0;
+}
+
+
+.delver-statblock-inventory-heading
+> div:first-child
+> span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+
+  opacity: 0.55;
+}
+
+
+.delver-statblock-inventory-summary {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 4px;
+
+  white-space: nowrap;
+
+  font-size: 11px;
+}
+
+
+.delver-statblock-inventory-summary label {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 3px;
+}
+
+
+.delver-statblock-inventory-summary
+input[type="number"] {
+  width: 42px;
+  height: 24px;
+
+  padding: 0 3px;
+
+  text-align: center;
+
+  font-weight: 900;
+}
+
+
+.delver-statblock-item-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 5px;
+}
+
+
+.delver-statblock-owned-item {
+  display: grid;
+
+  grid-template-columns:
+    28px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 6px;
+
+  min-width: 0;
+  min-height: 34px;
+
+  padding:
+    3px
+    6px
+    3px
+    3px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.12);
+
+  border-radius: 5px;
+
+  background:
+    rgba(0, 0, 0, 0.035);
+
+  cursor: grab;
+}
+
+
+.delver-statblock-owned-item:active {
+  cursor: grabbing;
+}
+
+
+.delver-statblock-owned-item:hover {
+  border-color:
+    rgba(255, 255, 255, 0.24);
+
+  background:
+    rgba(255, 255, 255, 0.04);
+}
+
+
+.delver-statblock-owned-item img {
+  display: block;
+
+  width: 28px;
+  height: 28px;
+
+  object-fit: cover;
+
+  border: none;
+  border-radius: 4px;
+}
+
+
+.delver-statblock-item-name {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.delver-statblock-item-meta {
+  max-width: 110px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  text-align: right;
+
+  font-size: 9px;
+
+  opacity: 0.58;
+}
+
+
+.delver-statblock-inventory-empty {
+  grid-column:
+    1 / -1;
+
+  padding: 12px;
+
+  border:
+    1px dashed
+    rgba(255, 255, 255, 0.16);
+
+  border-radius: 5px;
+
+  text-align: center;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  opacity: 0.48;
+}
+
+
+@media (max-width: 820px) {
+
+  .delver-statblock-inventory-heading {
+    align-items: flex-start;
+  }
+
+
+  .delver-statblock-inventory-summary {
+    width: 100%;
+
+    justify-content: flex-start;
+  }
+
+
+  .delver-statblock-item-list {
+    grid-template-columns:
+      1fr;
+  }
+}
+/* ========================================================== */
+/* CHARACTER MULTI-SLOT / BULKY BLOCK                         */
+/* ========================================================== */
+
+/*
+ * A Bulky Item still occupies real numbered inventory slots.
+ * The anchor row owns the Item document; following rows are
+ * reserved by that same Item and merge into one blue block.
+ */
+
+.inv-slot.slot-bulky-block {
+  opacity: 1;
+
+  border-style: solid;
+  border-color: rgba(74, 151, 255, 0.68);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(55, 126, 224, 0.19),
+      rgba(65, 145, 255, 0.08)
+    );
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(91, 169, 255, 0.72);
+}
+
+
+.inv-slot.slot-bulky-block
+.slot-number {
+  border-right-color:
+    rgba(91, 169, 255, 0.30);
+
+  color:
+    rgba(153, 202, 255, 0.98);
+
+  opacity: 0.92;
+}
+
+
+/* Top of the merged block. */
+.inv-slot.slot-bulky-start {
+  margin-bottom: 0;
+
+  border-bottom-color:
+    rgba(74, 151, 255, 0.20);
+
+  border-radius:
+    8px 8px 0 0;
+}
+
+
+/* Continuation rows visually touch the row above. */
+.inv-slot.slot-bulky-reserved {
+  margin-top: 0;
+  margin-bottom: 0;
+
+  border-top-width: 0;
+  border-bottom-color:
+    rgba(74, 151, 255, 0.20);
+
+  border-radius: 0;
+}
+
+
+/* Restore the normal inventory-row gap after the final slot. */
+.inv-slot.slot-bulky-end {
+  margin-bottom: 3px;
+
+  border-bottom-color:
+    rgba(74, 151, 255, 0.68);
+
+  border-radius:
+    0 0 8px 8px;
+}
+
+
+.slot-bulky-cost {
+  flex: 0 0 auto;
+
+  padding: 2px 5px;
+
+  border:
+    1px solid
+    rgba(105, 180, 255, 0.36);
+
+  border-radius: 999px;
+
+  background:
+    rgba(53, 129, 225, 0.14);
+
+  color:
+    rgba(174, 215, 255, 0.96);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+
+.slot-bulky-reservation {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+}
+
+
+.slot-bulky-reserved-line {
+  display: block;
+
+  width: 100%;
+  height: 1px;
+
+  background:
+    rgba(110, 184, 255, 0.12);
+}
+
+
+/*
+ * Reserved rows are real occupied slots, never ordinary drop
+ * targets. Give invalid hover feedback precedence over blue.
+ */
+.inv-slot.slot-bulky-block.slot-drop-invalid {
+  border-color:
+    rgba(255, 80, 80, 0.72);
+
+  background:
+    rgba(255, 60, 60, 0.10);
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(255, 95, 95, 0.64);
+}
+
+
+/*
+ * CON loss may push part of a Bulky footprint over capacity.
+ * Keep the block readable while retaining the existing danger
+ * treatment instead of fading the reserved rows away.
+ */
+.inv-slot.slot-bulky-block.slot-over-capacity {
+  opacity: 1;
+
+  border-color:
+    rgba(255, 80, 80, 0.65);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(170, 69, 115, 0.18),
+      rgba(255, 60, 60, 0.08)
+    );
+}
+
+/* ========================================================== */
+/* BULKY TEXT READABILITY                                     */
+/* ========================================================== */
+
+.inv-slot.slot-bulky-block,
+.inv-slot.slot-bulky-block .slot-number,
+.inv-slot.slot-bulky-block .slot-label,
+.inv-slot.slot-bulky-block .slot-name,
+.inv-slot.slot-bulky-block .slot-bulky-cost {
+  color: inherit;
+}
+
+
+.inv-slot.slot-bulky-block .slot-number {
+  opacity: 0.72;
+}
+
+
+.inv-slot.slot-bulky-block .slot-bulky-cost {
+  color: inherit;
+
+  border-color:
+    rgba(74, 151, 255, 0.55);
+
+  background:
+    rgba(74, 151, 255, 0.10);
 }

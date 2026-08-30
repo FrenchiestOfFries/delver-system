@@ -134,11 +134,24 @@
 
     <div class="header-meta">
 
-      <div class="meta-field">
+      <div class="meta-field level-meta-field">
 
-        <label>
-          Level
-        </label>
+        <div class="meta-field-label-row">
+
+          <label>
+            Level
+          </label>
+
+          <button
+            class="level-up-action"
+            type="button"
+            title="Level Up"
+            {{#unless isEditable}}disabled{{/unless}}
+          >
+            +1
+          </button>
+
+        </div>
 
         <input
           type="number"
@@ -409,6 +422,11 @@
             kind-{{slot.kind}}
             {{#unless slot.available}}slot-unavailable{{/unless}}
             {{#if slot.overCapacity}}slot-over-capacity{{/if}}
+            {{#if slot.isBulky}}slot-bulky-block{{/if}}
+            {{#if slot.isBulkyAnchor}}slot-bulky-anchor{{/if}}
+            {{#if slot.isBulkyReserved}}slot-bulky-reserved{{/if}}
+            {{#if slot.bulkyStart}}slot-bulky-start{{/if}}
+            {{#if slot.bulkyEnd}}slot-bulky-end{{/if}}
           "
           data-index="{{slot.index}}"
           data-kind="{{slot.kind}}"
@@ -424,57 +442,80 @@
 
             {{#if slot.occupied}}
 
-              {{#if (eq slot.kind "item")}}
+              {{#if (eq slot.kind "reserved")}}
 
-                {{#if slot.hasEmbeddedItem}}
+                <div
+                  class="slot-bulky-reservation"
+                  title="{{slot.displayLabel}} occupies this inventory slot"
+                >
 
-                  <div
-                    class="delver-owned-item slot-item"
-                    data-item-id="{{slot.itemId}}"
-                    draggable="true"
-                    title="Right-click for actions · Double-click to open"
-                  >
+                  <span class="slot-bulky-reserved-line"></span>
 
-                    <img
-                      class="slot-item-image"
-                      src="{{slot.itemImg}}"
-                      alt=""
-                    />
+                </div>
+
+              {{else}}
+
+                {{#if (eq slot.kind "item")}}
+
+                  {{#if slot.hasEmbeddedItem}}
+
+                    <div
+                      class="delver-owned-item slot-item"
+                      data-item-id="{{slot.itemId}}"
+                      draggable="true"
+                      title="Right-click for actions · Double-click to open"
+                    >
+
+                      <img
+                        class="slot-item-image"
+                        src="{{slot.itemImg}}"
+                        alt=""
+                      />
+
+                      <span class="slot-display-label">
+                        {{slot.displayLabel}}
+                      </span>
+
+                      {{#if slot.isBulkyAnchor}}
+
+                        <span class="slot-bulky-cost">
+                          {{slot.bulkySlotCost}} slots
+                        </span>
+
+                      {{/if}}
+
+                    </div>
+
+                  {{else}}
+
+                    <span class="slot-chip">
+                      Item
+                    </span>
 
                     <span class="slot-display-label">
                       {{slot.displayLabel}}
                     </span>
 
-                  </div>
+                    <span class="slot-legacy-label">
+                      Legacy
+                    </span>
+
+                  {{/if}}
 
                 {{else}}
 
-                  <span class="slot-chip">
-                    Item
+                  <span
+                    class="slot-chip"
+                    title="Right-click for actions"
+                  >
+                    {{slot.kindLabel}}
                   </span>
 
                   <span class="slot-display-label">
                     {{slot.displayLabel}}
                   </span>
 
-                  <span class="slot-legacy-label">
-                    Legacy
-                  </span>
-
                 {{/if}}
-
-              {{else}}
-
-                <span
-                  class="slot-chip"
-                  title="Right-click for actions"
-                >
-                  {{slot.kindLabel}}
-                </span>
-
-                <span class="slot-display-label">
-                  {{slot.displayLabel}}
-                </span>
 
               {{/if}}
 

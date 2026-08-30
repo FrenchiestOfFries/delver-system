@@ -1,0 +1,336 @@
+<form class="delver-sheet delver-statblock-v2 delver-enemy-sheet" autocomplete="off">
+
+  <header class="delver-statblock-header">
+
+    <div class="delver-statblock-portrait-wrap">
+
+      <img
+        class="delver-statblock-portrait"
+        src="{{actor.img}}"
+        data-edit="img"
+        title="{{actor.name}}"
+        alt="{{actor.name}}"
+      />
+
+    </div>
+
+
+    <div class="delver-statblock-title">
+
+      <div class="delver-statblock-type">
+        ENEMY
+      </div>
+
+      <input
+        class="delver-statblock-name"
+        type="text"
+        name="name"
+        value="{{actor.name}}"
+        placeholder="Enemy Name"
+      />
+
+    </div>
+
+
+    <div class="delver-statblock-resource">
+
+      <label>
+        HP
+      </label>
+
+      <div class="resource-ratio">
+
+        <input
+          type="number"
+          name="system.hp.current"
+          value="{{statblock.hp.current}}"
+          min="0"
+        />
+
+        <span>/</span>
+
+        <input
+          type="number"
+          name="system.hp.max"
+          value="{{statblock.hp.max}}"
+          min="0"
+        />
+
+      </div>
+
+    </div>
+
+
+    <div class="delver-statblock-resource">
+
+      <label>
+        Luck
+      </label>
+
+      <div class="resource-ratio">
+
+        <input
+          type="number"
+          name="system.luck.current"
+          value="{{statblock.luck.current}}"
+          min="0"
+        />
+
+        <span>/</span>
+
+        <input
+          type="number"
+          name="system.luck.max"
+          value="{{statblock.luck.max}}"
+          min="0"
+        />
+
+      </div>
+
+    </div>
+
+
+    <div class="delver-statblock-direct-stat">
+
+      <label>
+        Defense
+      </label>
+
+      <input
+        type="number"
+        name="system.defense.value"
+        value="{{statblock.defense}}"
+      />
+
+    </div>
+
+
+    <div class="delver-statblock-direct-stat">
+
+      <label>
+        Speed
+      </label>
+
+      <div class="delver-statblock-speed-input">
+
+        <input
+          type="number"
+          name="system.speed.baseOverride"
+          value="{{statblock.speed}}"
+          min="0"
+        />
+
+        <span>
+          ft
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <section class="delver-abilities">
+
+    <div class="ability">
+      <label>STR</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.str"
+        value="{{systemData.abilities.str}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+
+    <div class="ability">
+      <label>DEX</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.dex"
+        value="{{systemData.abilities.dex}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+
+    <div class="ability">
+      <label>CON</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.con"
+        value="{{systemData.abilities.con}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+
+    <div class="ability">
+      <label>INT</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.int"
+        value="{{systemData.abilities.int}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+
+    <div class="ability">
+      <label>WIS</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.wis"
+        value="{{systemData.abilities.wis}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+
+    <div class="ability">
+      <label>CHA</label>
+
+      <input
+        class="ability-value"
+        type="number"
+        name="system.abilities.cha"
+        value="{{systemData.abilities.cha}}"
+        min="-10"
+        max="10"
+      />
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- OWNED INVENTORY                                        -->
+  <!-- ====================================================== -->
+
+  <section class="delver-statblock-inventory">
+
+    <div class="delver-statblock-section-heading delver-statblock-inventory-heading">
+
+      <div>
+
+        <h2>
+          Inventory
+        </h2>
+
+        <span>
+          Drop Delver Items here · Right-click for actions
+        </span>
+
+      </div>
+      
+    </div>
+
+
+    <div class="delver-statblock-item-list">
+
+      {{#if hasInventoryItems}}
+
+        {{#each inventoryItems as |item|}}
+
+          <div
+            class="delver-statblock-owned-item"
+            data-item-id="{{item.id}}"
+            draggable="true"
+            title="Right-click for actions · Double-click to open"
+          >
+
+            <img
+              src="{{item.img}}"
+              alt=""
+            />
+
+
+            <span class="delver-statblock-item-name">
+              {{item.name}}
+            </span>
+
+
+            <span class="delver-statblock-item-meta">
+
+              {{item.categoryLabel}}
+
+              {{#if item.bulky}}
+                · {{item.slotCost}} spaces
+              {{/if}}
+
+            </span>
+
+          </div>
+
+        {{/each}}
+
+      {{else}}
+
+        <div class="delver-statblock-inventory-empty">
+          Drop Items Here
+        </div>
+
+      {{/if}}
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- NOTES                                                  -->
+  <!-- ====================================================== -->
+
+  <section class="delver-statblock-notes">
+
+    <div class="delver-statblock-section-heading">
+
+      <h2>
+        Combat / Statblock Notes
+      </h2>
+
+      <span>
+        Attacks, damage, special actions, traits,
+        tactics, loot, or encounter notes.
+      </span>
+
+    </div>
+
+
+    <textarea
+      name="system.notes"
+      placeholder="Enemy combat notes..."
+    >{{systemData.notes}}</textarea>
+
+  </section>
+
+
+  <footer class="delver-footer">
+
+    <button type="submit">
+
+      <i class="fas fa-save"></i>
+
+      Save
+
+    </button>
+
+  </footer>
+
+</form>

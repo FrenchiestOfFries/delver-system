@@ -124,6 +124,7 @@ function normalizeInventorySlots(
         [
           "empty",
           "item",
+          "reserved",
           "wound",
           "fatigue"
         ].includes(
@@ -137,8 +138,12 @@ function normalizeInventorySlots(
         kind,
 
         itemId:
-          oldSlot.itemId ??
-          "",
+          (
+            kind === "item" ||
+            kind === "reserved"
+          )
+            ? oldSlot.itemId ?? ""
+            : "",
 
         label:
           kind === "item"

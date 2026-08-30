@@ -11,7 +11,8 @@ import { SimpleToken, SimpleTokenDocument } from "./token.js";
 
 // Sheets
 import { DelverCharacterSheet } from "./delver-character-sheet.js";
-import { DelverStatblockSheet } from "./delver-statblock-sheet.js";
+import { DelverNpcSheet } from "./delver-npc-sheet.js";
+import { DelverEnemySheet } from "./delver-enemy-sheet.js";
 import { SimpleItemSheet } from "./item-sheet.js";
 
 // System utilities
@@ -45,10 +46,16 @@ Hooks.once("init", async function () {
     label: "Delver Character Sheet"
   });
 
-  Actors.registerSheet("delver", DelverStatblockSheet, {
-    types: ["npc", "enemy"],
+  Actors.registerSheet("delver", DelverNpcSheet, {
+    types: ["npc"],
     makeDefault: true,
-    label: "Delver Statblock"
+    label: "Delver NPC Sheet"
+  });
+
+  Actors.registerSheet("delver", DelverEnemySheet, {
+    types: ["enemy"],
+    makeDefault: true,
+    label: "Delver Enemy Sheet"
   });
 
 

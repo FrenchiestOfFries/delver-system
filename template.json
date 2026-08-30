@@ -1,7 +1,13 @@
 {
   "Actor": {
-    "types": ["character", "npc", "enemy"],
-    "htmlFields": ["notes"],
+    "types": [
+      "character",
+      "npc",
+      "enemy"
+    ],
+    "htmlFields": [
+      "notes"
+    ],
 
     "character": {
       "identity": {
@@ -91,13 +97,22 @@
         "cha": 0
       },
 
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+
       "luck": {
         "current": 0,
         "max": 0
       },
 
+      "defense": {
+        "value": 10
+      },
+
       "speed": {
-        "baseOverride": null
+        "baseOverride": 30
       },
 
       "notes": ""
@@ -113,13 +128,22 @@
         "cha": 0
       },
 
+      "hp": {
+        "current": 1,
+        "max": 1
+      },
+
       "luck": {
         "current": 0,
         "max": 0
       },
 
+      "defense": {
+        "value": 10
+      },
+
       "speed": {
-        "baseOverride": null
+        "baseOverride": 30
       },
 
       "notes": ""
@@ -127,17 +151,31 @@
   },
 
   "Item": {
-    "types": ["item"],
-    "htmlFields": ["description"],
+    "types": [
+      "item"
+    ],
+    "htmlFields": [
+      "description"
+    ],
 
     "item": {
       "description": "",
 
-      "category": "misc",
+      "category": "gear",
+
+      "quality": 0,
+      "decay": 0,
+
+      "magical": false,
+
+      "traits": {
+        "equippable": false,
+        "keyItem": false,
+        "bulkySlots": 0
+      },
 
       "carryMode": "slot",
 
-      "equippable": false,
       "equipped": false,
 
       "charges": {
@@ -148,11 +186,20 @@
 
       "weapon": {
         "class": "",
-        "die": ""
+        "baseDie": ""
       },
 
       "armor": {
         "defense": 1
+      },
+
+      "consumable": {
+        "action": ""
+      },
+
+      "spellVessel": {
+        "spellUuid": "",
+        "inert": false
       }
     }
   }

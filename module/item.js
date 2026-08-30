@@ -1,40 +1,20 @@
-const DELVER_VALID_CARRY_MODES = new Set([
-  "slot",
-  "loose",
-  "backpack",
-  "bulky"
-]);
+import {
+  getWeaponBaseDie,
+  isItemEquippable,
+  normalizeBulkySlots,
+  normalizeCarryMode,
+  normalizeDecay,
+  normalizeItemCategory,
+  normalizeQuality,
+  normalizeWeaponDie
+} from "./delver-item-rules.js";
 
 
 /* ========================================================== */
 /* HELPERS                                                    */
 /* ========================================================== */
 
-function normalizeCarryMode(value) {
-
-  /*
-   * Migration:
-   *
-   * Early Delver builds called this carry mode "large".
-   * It actually represents cumbersome / encumbering
-   * objects rather than weapon size.
-   */
-  if (value === "large") {
-    return "bulky";
-  }
-
-
-  return DELVER_VALID_CARRY_MODES.has(
-    value
-  )
-    ? value
-    : "slot";
-}
-
-
-function itemIsInActorSlot(
-  item
-) {
+function itemIsInActorSlot(item) {
 
   const actor =
     item.parent;
@@ -67,60 +47,12 @@ function itemIsInActorSlot(
 }
 
 
-function itemIsEquippable(
-  item,
-  categoryOverride = undefined,
-  equippableOverride = undefined
-) {
-
-  const category =
-    categoryOverride ??
-    item.system?.category ??
-    "misc";
-
-
-  /*
-   * Weapons and Armor are inherently equipment.
-   *
-   * Other categories can opt-in using the generic
-   * system.equippable flag.
-   */
-  if (
-    category === "weapon" ||
-    category === "armor"
-  ) {
-
-    return true;
-  }
-
-
-  const explicit =
-    equippableOverride ??
-    item.system?.equippable ??
-    false;
-
-
-  return Boolean(explicit);
-}
-
-
 function setUpdateProperty(
   changes,
   path,
   value
 ) {
 
-  /*
-   * Foundry update objects may arrive either flattened:
-   *
-   * "system.equipped": true
-   *
-   * or nested:
-   *
-   * system: { equipped: true }
-   *
-   * Support both.
-   */
   if (
     Object.prototype.hasOwnProperty.call(
       changes,
@@ -130,6 +62,7 @@ function setUpdateProperty(
 
     changes[path] =
       value;
+
 
     return;
   }
@@ -167,7 +100,10 @@ export class SimpleItem extends Item {
       );
 
 
-    if (allowed === false) {
+    if (
+      allowed === false
+    ) {
+
       return false;
     }
 
@@ -179,70 +115,207 @@ export class SimpleItem extends Item {
 
 
     /* ------------------------------------------------------ */
-    /* Proposed Category                                      */
+    /* CATEGORY                                                */
     /* ------------------------------------------------------ */
 
-    const hasCategoryChange =
+    const requestedCategory =
       Object.prototype.hasOwnProperty.call(
         flatChanges,
         "system.category"
-      );
-
-
-    const category =
-      hasCategoryChange
+      )
         ? flatChanges[
             "system.category"
           ]
-        : this.system?.category ??
-          "misc";
+        : this.system?.category;
 
 
-    /* ------------------------------------------------------ */
-    /* Proposed Equippable Flag                               */
-    /* ------------------------------------------------------ */
-
-    const hasEquippableChange =
-      Object.prototype.hasOwnProperty.call(
-        flatChanges,
-        "system.equippable"
+    const category =
+      normalizeItemCategory(
+        requestedCategory
       );
 
 
-    const explicitEquippable =
-      hasEquippableChange
+    if (
+      requestedCategory !==
+      category
+    ) {
+
+      setUpdateProperty(
+        changes,
+        "system.category",
+        category
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* QUALITY                                                 */
+    /* ------------------------------------------------------ */
+
+    const requestedQuality =
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.quality"
+      )
+        ? flatChanges[
+            "system.quality"
+          ]
+        : this.system?.quality;
+
+
+    const quality =
+      normalizeQuality(
+        requestedQuality
+      );
+
+
+    if (
+      Number(
+        requestedQuality ?? 0
+      ) !== quality
+    ) {
+
+      setUpdateProperty(
+        changes,
+        "system.quality",
+        quality
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* DECAY                                                   */
+    /* ------------------------------------------------------ */
+
+    const requestedDecay =
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.decay"
+      )
+        ? flatChanges[
+            "system.decay"
+          ]
+        : this.system?.decay;
+
+
+    const decay =
+      normalizeDecay(
+        category,
+        requestedDecay
+      );
+
+
+    if (
+      Number(
+        requestedDecay ?? 0
+      ) !== decay
+    ) {
+
+      setUpdateProperty(
+        changes,
+        "system.decay",
+        decay
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* EQUIPPABLE TRAIT                                        */
+    /* ------------------------------------------------------ */
+
+    const requestedExplicitEquippable =
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.traits.equippable"
+      )
         ? Boolean(
             flatChanges[
-              "system.equippable"
+              "system.traits.equippable"
             ]
           )
         : Boolean(
-            this.system?.equippable
+            this.system
+              ?.traits
+              ?.equippable ||
+            this.system
+              ?.equippable
           );
 
 
-    const equippable =
-      (
-        category === "weapon" ||
-        category === "armor"
-      )
-        ? true
-        : explicitEquippable;
-
-
     /* ------------------------------------------------------ */
-    /* Proposed Carry Mode                                    */
+    /* KEY ITEM                                                */
     /* ------------------------------------------------------ */
 
-    const hasCarryChange =
+    const requestedKeyItem =
       Object.prototype.hasOwnProperty.call(
         flatChanges,
-        "system.carryMode"
+        "system.traits.keyItem"
+      )
+        ? Boolean(
+            flatChanges[
+              "system.traits.keyItem"
+            ]
+          )
+        : Boolean(
+            this.system
+              ?.traits
+              ?.keyItem
+          );
+
+
+    /* ------------------------------------------------------ */
+    /* BULKY                                                   */
+    /* ------------------------------------------------------ */
+
+    const requestedBulkySlots =
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.traits.bulkySlots"
+      )
+        ? flatChanges[
+            "system.traits.bulkySlots"
+          ]
+        : this.system
+            ?.traits
+            ?.bulkySlots ??
+          (
+            normalizeCarryMode(
+              this.system?.carryMode
+            ) === "bulky"
+              ? 2
+              : 0
+          );
+
+
+    const bulkySlots =
+      normalizeBulkySlots(
+        requestedBulkySlots
       );
 
 
+    if (
+      Number(
+        requestedBulkySlots ?? 0
+      ) !== bulkySlots
+    ) {
+
+      setUpdateProperty(
+        changes,
+        "system.traits.bulkySlots",
+        bulkySlots
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* CARRY MODE                                              */
+    /* ------------------------------------------------------ */
+
     const requestedCarryMode =
-      hasCarryChange
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.carryMode"
+      )
         ? flatChanges[
             "system.carryMode"
           ]
@@ -255,10 +328,6 @@ export class SimpleItem extends Item {
       );
 
 
-    /*
-     * Persist the old "large" -> "bulky" migration
-     * whenever this Item receives an update.
-     */
     if (
       requestedCarryMode !==
       carryMode
@@ -273,18 +342,96 @@ export class SimpleItem extends Item {
 
 
     /* ------------------------------------------------------ */
-    /* Proposed Equipped State                                */
+    /* WEAPON BASE DIE                                         */
     /* ------------------------------------------------------ */
 
-    const hasEquippedChange =
+    const requestedBaseDie =
       Object.prototype.hasOwnProperty.call(
         flatChanges,
-        "system.equipped"
+        "system.weapon.baseDie"
+      )
+        ? flatChanges[
+            "system.weapon.baseDie"
+          ]
+        : getWeaponBaseDie(
+            this.system ?? {}
+          );
+
+
+    const baseDie =
+      normalizeWeaponDie(
+        requestedBaseDie
       );
 
 
+    if (
+      requestedBaseDie !==
+      baseDie
+    ) {
+
+      setUpdateProperty(
+        changes,
+        "system.weapon.baseDie",
+        baseDie
+      );
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* PROPOSED SYSTEM                                         */
+    /* ------------------------------------------------------ */
+
+    const proposedSystem =
+      foundry.utils.deepClone(
+        this.system ?? {}
+      );
+
+
+    proposedSystem.category =
+      category;
+
+
+    proposedSystem.quality =
+      quality;
+
+
+    proposedSystem.decay =
+      decay;
+
+
+    proposedSystem.carryMode =
+      carryMode;
+
+
+    proposedSystem.traits = {
+      ...(proposedSystem.traits ?? {}),
+
+      equippable:
+        requestedExplicitEquippable,
+
+      keyItem:
+        requestedKeyItem,
+
+      bulkySlots
+    };
+
+
+    proposedSystem.weapon = {
+      ...(proposedSystem.weapon ?? {}),
+
+      baseDie
+    };
+
+
+    /* ------------------------------------------------------ */
+    /* EQUIPPED STATE                                         */
+    /* ------------------------------------------------------ */
+
     const wantsEquipped =
-      hasEquippedChange
+      Object.prototype.hasOwnProperty.call(
+        flatChanges,
+        "system.equipped"
+      )
         ? Boolean(
             flatChanges[
               "system.equipped"
@@ -295,27 +442,15 @@ export class SimpleItem extends Item {
           );
 
 
-    /*
-     * EQUIPMENT INVARIANT
-     *
-     * An Item may only actually be Equipped if:
-     *
-     * 1. It is equippable.
-     * 2. It belongs to a Character Actor.
-     * 3. carryMode is "slot".
-     * 4. It is actually referenced by a numbered
-     *    inventory slot.
-     *
-     * Backpack / Loose / Bulky Items therefore cannot
-     * remain Equipped.
-     */
     const actor =
       this.parent;
 
 
     const ownedByCharacter =
-      actor?.documentName === "Actor" &&
-      actor.type === "character";
+      actor?.documentName ===
+        "Actor" &&
+      actor.type ===
+        "character";
 
 
     const assignedToSlot =
@@ -324,8 +459,17 @@ export class SimpleItem extends Item {
       );
 
 
+    /*
+     * v0.1.5A keeps our existing equipment invariant.
+     *
+     * v0.1.5B will deliberately modify this when Bulky
+     * becomes real multi-slot inventory occupancy.
+     */
+
     const validEquippedState =
-      equippable &&
+      isItemEquippable(
+        proposedSystem
+      ) &&
       ownedByCharacter &&
       carryMode === "slot" &&
       assignedToSlot;
