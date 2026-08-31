@@ -1,6 +1,6 @@
 {
   "id": "delver",
-  "version": "0.1.5",
+  "version": "0.1.5A",
   "title": "Delver",
 
   "url": "https://github.com/FrenchiestOfFries/delver-system",
@@ -68,7 +68,7 @@
 
   "manifest": "https://raw.githubusercontent.com/FrenchiestOfFries/delver-system/refs/heads/main/system.json",
 
-  "download": "https://github.com/FrenchiestOfFries/delver-system/releases/download/v0.1.5/delver.zip",
+  "download": "https://github.com/FrenchiestOfFries/delver-system/releases/download/v0.1.5A/delver.zip",
 
   "grid": {
     "distance": 5,
